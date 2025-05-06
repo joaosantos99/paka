@@ -40,6 +40,12 @@ export default defineConfig({
       '@views': path.resolve(__dirname, 'src/views'),
       '@controllers': path.resolve(__dirname, 'src/controllers'),
       '@scripts': path.resolve(__dirname, 'src/scripts'),
+      '@stories': path.resolve(__dirname, 'src/stories'),
+      '@tests': path.resolve(__dirname, 'src/tests'),
     }
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+  }
 });
