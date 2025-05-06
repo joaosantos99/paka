@@ -5,11 +5,12 @@ export class Button extends HTMLElement {
 
   connectedCallback() {
     this.render();
+    this.textContent = 'Test Button';
   }
 
   render() {
     this.innerHTML = `
-      <button>Test Button</button>
+      <button>${this.textContent}</button>
     `;
   }
 
