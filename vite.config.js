@@ -43,6 +43,7 @@ export default defineConfig({
       '@scripts': path.resolve(__dirname, 'src/scripts'),
       '@stories': path.resolve(__dirname, 'src/stories'),
       '@tests': path.resolve(__dirname, 'src/tests'),
+      '@constants': path.resolve(__dirname, 'src/constants'),
     }
   },
   test: {
