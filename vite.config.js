@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import tailwindcss from '@tailwindcss/vite'
 
 function rewriteCleanUrls() {
   return {
@@ -23,7 +24,7 @@ function rewriteCleanUrls() {
 
 export default defineConfig({
   root: 'src',
-  plugins: [rewriteCleanUrls()],
+  plugins: [rewriteCleanUrls(), tailwindcss()],
   build: {
     rollupOptions: {
       input: {
