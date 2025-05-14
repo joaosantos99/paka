@@ -1,46 +1,50 @@
-import { fn } from '@storybook/test';
+import '@views/buttonView';
+import { ButtonController } from '@controllers/ButtonController.js';
 
-import { Button } from '@views/buttonView';
-
-// More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 export default {
   title: 'Example/Button',
   tags: ['autodocs'],
-  render: (args) => new Button(args),
+  args: {
+    size: "default",
+    style: "primary",
+  },
   argTypes: {
-    backgroundColor: { control: 'color' },
     size: {
-      control: { type: 'select' },
-      options: ['small', 'medium', 'large'],
+      control: 'text',
+      description: 'Value of the input',
+    },
+    style: {
+      control: 'text',
+      description: 'Text shown in the input placeholder',
     },
   },
-  args: { onClick: fn() },
+  render: (args) => {
+    const element = document.createElement('button-component');
+
+    console.log(element)
+
+    if (args.size) {
+      element.setAttribute('size', args.size);
+    }
+    if (args.style) {
+      element.setAttribute('style', args.style);
+    }
+
+    // Initialize controller after component connects
+    setTimeout(() => {
+      new ButtonController(element);
+    });
+
+    return element;
+  },
+  argTypes: {
+    size: { control: 'text' },
+  },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary = {
   args: {
-    primary: true,
-    label: 'Button',
-  },
-};
-
-export const Secondary = {
-  args: {
-    label: 'Button',
-  },
-};
-
-export const Large = {
-  args: {
-    size: 'large',
-    label: 'Button',
-  },
-};
-
-export const Small = {
-  args: {
-    size: 'small',
-    label: 'Button',
+    size: "default",
+    style: "primary",
   },
 };

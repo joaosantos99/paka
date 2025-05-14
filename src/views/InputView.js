@@ -37,7 +37,6 @@ export class InputView extends HTMLElement {
     `;
   }
 
-
   setController(controller) {
     this.controller = controller;
   }
