@@ -1,8 +1,4 @@
 export default class HeaderModel {
-  /**
-   * Constructor initializes the model by locating the <body> element
-   * and inserting the header template at the very top.
-   */
   constructor() {
     // Select the <body> element from the DOM
     this.body = document.querySelector('body');
@@ -12,10 +8,6 @@ export default class HeaderModel {
     this.body.insertAdjacentHTML('afterbegin', this.getTemplate());
   }
 
-  /**
-   * Returns a string containing the HTML for the site header.
-   * This uses a template literal to span multiple lines cleanly.
-   */
   getTemplate = () => `
     <header class="sm:py-7 py-6">
       <!-- Main navigation container -->
