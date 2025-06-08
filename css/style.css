@@ -20,3 +20,14 @@ body {
    color: var(--primary-color);
    min-height: 100vh;
 }
+
+.page-not-found {
+   min-height: calc(100vh - 98px);
+}
+
+/* Media Queries */
+@media only screen and (max-width: 640px) {
+   .page-not-found {
+      min-height: calc(100vh - 90px);
+   }
+}
