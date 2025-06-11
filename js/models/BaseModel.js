@@ -34,6 +34,11 @@ class BaseModel {
     }
     return model;
   }
+
+  getByField(field, value) {
+    const models = LocalStorageCRUD.read(this.modelName);
+    return models.find(m => m[field].toLowerCase() === value.toLowerCase());
+  }
 }
 
 export default BaseModel;
