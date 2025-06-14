@@ -36,7 +36,7 @@ export default class HeaderModel {
         <!-- Desktop menu items (hidden on small screens) -->
         <ul class="sm:flex hidden gap-6 items-center ${this.lightHeaderContainer ? 'text-[var(--screen-bg)]' : 'text-[var(--off-black)]'}">
           ${this.getMenuItems()}
-          <li><a href="#" class="text-sm">Contacts</a></li>
+          <li><a href="/html/contacts.html" class="text-sm">Contacts</a></li>
         </ul>
 
         <!-- User icon for desktop, toggle icon for mobile -->
