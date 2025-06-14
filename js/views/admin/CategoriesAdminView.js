@@ -7,12 +7,15 @@ class CategoriesAdminView extends BaseAdminView {
   constructor({ model }) {
     super();
     this.model = model;
-    this.renderView();
-    this.initializeEventListeners();
-    this.initializeImageEventListeners();
+    Promise.all([
+      this.renderView(),
+    ]).then(() => {
+      this.initializeEventListeners();
+      this.initializeImageEventListeners();
+    });
   }
 
-  getTemplate() {
+  async getTemplate() {
     return `
       <div class="mt-8 flex items-center gap-5 justify-between">
           <h4 class="text-3xl font-semibold">Dashboard</h4>
@@ -102,20 +105,25 @@ class CategoriesAdminView extends BaseAdminView {
                   </tr>
               </thead>
               <tbody>
-                  ${this.getCategoryRows()}
+                  ${await this.getCategoryRows()}
               </tbody>
           </table>
       </div>
     `;
   }
 
-  getCategoryRows() {
+  async getCategoryRows() {
     const categories = this.model.getAll();
 
-    categories.forEach(category => {
-      const featuredImage = FileStorage.getFile(category.featuredImage);
-      const icon = FileStorage.getFile(category.icon);
-      category.featuredImage = featuredImage ? URL.createObjectURL(featuredImage) : null;
+    categories.forEach(async category => {
+      if (category.featuredImage.length > 0) {
+        const featuredImage = await FileStorage.getFile(category.featuredImage);
+        category.featuredImage = featuredImage ? URL.createObjectURL(featuredImage) : null;
+      }
+      if (category.icon.length > 0) {
+        const icon = await FileStorage.getFile(category.icon);
+        category.icon = icon ? URL.createObjectURL(icon) : null;
+      }
       category.icon = icon ? URL.createObjectURL(icon) : null;
     });
 

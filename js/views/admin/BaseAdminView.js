@@ -41,12 +41,16 @@ class BaseAdminView extends BaseView {
     });
   }
 
-  hydrateView() {
+  async hydrateView() {
     const data = this.model.getAll();
     const mainContent = document.querySelector('main');
     if (!mainContent) return;
-    mainContent.innerHTML = this.getTemplate(data);
-    this.initializeEventListeners();
+    Promise.all([
+      this.getTemplate(data),
+    ]).then(([template]) => {
+      mainContent.innerHTML = template;
+      this.initializeEventListeners();
+    });
   }
 
   handleDelete(row) {
