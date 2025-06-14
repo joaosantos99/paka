@@ -21,6 +21,10 @@ body {
    min-height: 100vh;
 }
 
+main {
+   min-height: calc(100vh - 452px);
+}
+
 .login-hero,
 .page-not-found {
    min-height: calc(100vh - 98px);

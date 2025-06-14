@@ -18,20 +18,20 @@ export default class FooterModel {
                class="md:col-span-1 sm:col-span-3 col-span-2 md:block flex justify-center flex-col items-center md:border-b-0 border-b border-b-[var(--screen-bg)] md:pb-0 pb-7"
             >
                <a href="#" class="w-fit">
-                  <img src="../img/light-logo.svg" alt="Logo" width="200" />
+                  <img src="/img/light-logo.svg" alt="Logo" width="200" />
                </a>
 
                <div class="flex md:gap-4 gap-12 items-center md:mt-2 mt-8">
                   <a href="#">
-                     <img src="../img/icon/ic-insta.svg" alt="Instagram Icon" />
+                     <img src="/img/icon/ic-insta.svg" alt="Instagram Icon" />
                   </a>
 
                   <a href="#">
-                     <img src="../img/icon/ic-fb.svg" alt="Facebook Icon" />
+                     <img src="/img/icon/ic-fb.svg" alt="Facebook Icon" />
                   </a>
 
                   <a href="#">
-                     <img src="../img/icon/ic-twitter.svg" alt="Twitter Icon" />
+                     <img src="/img/icon/ic-twitter.svg" alt="Twitter Icon" />
                   </a>
                </div>
             </div>
