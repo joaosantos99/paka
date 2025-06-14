@@ -43,9 +43,7 @@ class PackModel extends BaseModel {
   }
 
   getByCategory(categoryName) {
-    console.log(categoryName);
     const packs = LocalStorageCRUD.read(this.modelName);
-    console.log(packs);
     return packs.filter(pack => {
       if (pack.categories && !pack.deleted) {
         return pack.categories.includes(categoryName);
