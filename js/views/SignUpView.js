@@ -1,3 +1,5 @@
+import UserModel from '/js/models/UserModel.js';
+
 export default class SignUpView {
   constructor() {
     this.main = document.querySelector('main');
@@ -40,7 +42,7 @@ export default class SignUpView {
 
     const formData = new FormData(event.target);
     const data = {
-      fullName: formData.get('fname'),
+      name: formData.get('fname'),
       email: formData.get('email'),
       password: formData.get('password'),
       confirmPassword: formData.get('confirmPassword')
@@ -54,7 +56,7 @@ export default class SignUpView {
     try {
       // Here you would typically make an API call to register the user
       // For now, we'll just simulate success
-      console.log('Form submitted with data:', data);
+      UserModel.create(data);
       window.location.href = '/html/login.html';
     } catch (error) {
       console.error('Error submitting form:', error);
