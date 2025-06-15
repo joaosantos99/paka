@@ -15,3 +15,4 @@ checkStorage('packs');
 checkStorage('categories');
 checkStorage('flights');
 checkStorage('search');
+checkStorage('contacts');

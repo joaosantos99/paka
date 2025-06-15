@@ -1,13 +1,15 @@
-class ContactsView {
-    constructor() {
-        this.render();
-        this.setupEventListeners();
-    }
+import ContactModel from '/js/models/ContactModel.js';
 
-    render() {
-        const main = document.querySelector('main');
-        main.innerHTML = `
-            <section class="my-10">
+class ContactsView {
+  constructor() {
+    this.render();
+    this.setupEventListeners();
+  }
+
+  render() {
+    const main = document.querySelector('main');
+    main.innerHTML = `
+            <section>
                 <div class="grid md:grid-cols-2 login-hero">
                     <div class="!bg-no-repeat !bg-cover !bg-center md:flex items-center justify-center hidden"
                         style="background: url(/img/contact-hero-bg.png)">
@@ -40,76 +42,75 @@ class ContactsView {
                 </div>
             </section>
         `;
+  }
+
+  validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  validateForm(formData) {
+    const errors = [];
+
+    if (!formData.fullName.trim()) {
+      errors.push('Full name is required');
     }
 
-    validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+    if (!formData.email.trim()) {
+      errors.push('Email is required');
+    } else if (!this.validateEmail(formData.email)) {
+      errors.push('Please enter a valid email address');
     }
 
-    validateForm(formData) {
-        const errors = [];
-
-        if (!formData.fullName.trim()) {
-            errors.push('Full name is required');
-        }
-
-        if (!formData.email.trim()) {
-            errors.push('Email is required');
-        } else if (!this.validateEmail(formData.email)) {
-            errors.push('Please enter a valid email address');
-        }
-
-        if (!formData.message.trim()) {
-            errors.push('Message is required');
-        }
-
-        return errors;
+    if (!formData.message.trim()) {
+      errors.push('Message is required');
     }
 
-    async handleSubmit(e) {
-        e.preventDefault();
+    return errors;
+  }
 
-        const formData = {
-            fullName: document.getElementById('fullName').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            message: document.getElementById('message').value.trim()
-        };
+  async handleSubmit(e) {
+    e.preventDefault();
 
-        const errors = this.validateForm(formData);
+    const formData = {
+      fullName: document.getElementById('fullName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      message: document.getElementById('message').value.trim()
+    };
 
-        if (errors.length > 0) {
-            alert(errors.join('\n'));
-            return;
-        }
+    const errors = this.validateForm(formData);
 
-        try {
-            // Here you would typically send the data to your backend
-            console.log('Form data:', formData);
-
-            // Clear the form
-            e.target.reset();
-
-            // Show success message
-            alert('Thank you for your message! We will get back to you soon.');
-
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            alert('There was an error sending your message. Please try again later.');
-        }
+    if (errors.length > 0) {
+      alert(errors.join('\n'));
+      return;
     }
 
-    setupEventListeners() {
-        const form = document.getElementById('contactForm');
-        if (form) {
-            form.addEventListener('submit', (e) => this.handleSubmit(e));
-        }
+    try {
+      ContactModel.create(formData);
+
+      // Clear the form
+      e.target.reset();
+
+      // Show success message
+      alert('Thank you for your message! We will get back to you soon.');
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('There was an error sending your message. Please try again later.');
     }
+  }
+
+  setupEventListeners() {
+    const form = document.getElementById('contactForm');
+    if (form) {
+      form.addEventListener('submit', (e) => this.handleSubmit(e));
+    }
+  }
 }
 
 // Initialize the view when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new ContactsView();
+  new ContactsView();
 });
 
 export default ContactsView;
