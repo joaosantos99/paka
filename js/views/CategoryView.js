@@ -1,17 +1,39 @@
+import CategoryModel from '/js/models/CategoryModel.js';
+import HeaderModel from '/js/views/HeaderView.js';
+import FileStorage from '/js/utilities/fileStorage.js';
+import PackModel from '/js/models/PackModel.js';
+
 class WaterPacksView {
-    constructor() {
-        this.render();
-        this.setupEventListeners();
+  constructor() {
+    this.categoryKey = null;
+    this.category = null;
+
+    const search = window.location.search;
+    if (search) {
+      const searchParams = new URLSearchParams(search);
+      this.categoryKey = searchParams.get('category');
     }
 
-    render() {
-        const main = document.querySelector('main');
-        main.innerHTML = `
+    if (this.categoryKey) {
+      this.category = CategoryModel.getByField('name', this.categoryKey);
+    }
+
+    Promise.all([
+      this.render(),
+    ]).then(() => {
+      this.setupEventListeners();
+    });
+  }
+
+  async render() {
+    const main = document.querySelector('main');
+    main.innerHTML = `
             <!-- Header + Search Section Start -->
-            <div class="sm:min-h-96 !bg-no-repeat !bg-cover !bg-center" style="background: url(/img/water-hero-bg.png)">
+            <div class="sm:min-h-96 !bg-no-repeat !bg-cover !bg-center" style="background: url(${await this.getImagePath(this.category.featuredImage)})">
+                <div id="lightHeaderContainer"></div>
                 <div class="text-[var(--screen-bg)] text-center sm:my-16 mt-16">
-                    <img src="/img/icon/ic-water.svg" alt="Water Img" width="82" class="mx-auto" />
-                    <h1 class="font-semibold text-4xl">Water</h1>
+                    <img src="${await this.getImagePath(this.category.icon)}" alt="Category icon" width="82" class="mx-auto mb-4" />
+                    <h1 class="font-semibold text-4xl">${this.category.name}</h1>
                 </div>
 
                 <!-- Search Filter Section Start -->
@@ -93,80 +115,93 @@ class WaterPacksView {
                             </div>
                         </div>
                     </div>
-                    <img src="/img/water-img.png" alt="Water Img" class="absolute bottom-0 left-0 -z-10" />
+                    <img src="${await this.getImagePath(this.category.icon)}" alt="Category icon" class="absolute bottom-0 left-0 -z-10 contrast-80 w-100" />
                 </div>
             </section>
             <!-- Filter + Cards Section End -->
         `;
+    new HeaderModel();
+    await this.renderPackCards();
+  }
 
-        this.renderPackCards();
+  async getImagePath(image) {
+    const imageFile = await FileStorage.getFile(image);
+    return imageFile ? URL.createObjectURL(imageFile) : null;
+  }
+
+  async renderPackCards() {
+    const packs = PackModel.getByCategory(this.category.name);
+
+    await Promise.all(packs.map(async pack => {
+      if (typeof pack.featuredImage === 'string' && pack.featuredImage.length > 0) {
+        pack.featuredImage = await this.getImagePath(pack.featuredImage);
+      }
+      if (pack.categories.length > 0) {
+        const categories = pack.categories.map(category => CategoryModel.getByField('name', category));
+        pack.icons = categories.map(category => category.icon);
+        pack.icons = await Promise.all(pack.icons.map(async icon => this.getImagePath(icon)));
+      }
+    }));
+
+    document.getElementById('packCards').innerHTML = packs.map(pack => `
+      <div
+        class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between"
+        style="background: url(${pack.featuredImage})"
+        data-id="${pack.id}"
+      >
+        <div class="flex items-center justify-center gap-3">
+          ${pack.icons.map(icon => `
+              <img src="${icon}" alt="${icon} Icon" width="34" />
+          `).join('')}
+        </div>
+        <div class="text-center my-16">
+          <h4 class="text-3xl font-semibold text-center">${pack.title}</h4>
+          <p>${this.formatDateRange(pack.startDate, pack.endDate)} / ${pack.price}€</p>
+        </div>
+        <button
+          type="button"
+          data-id="${pack.id}"
+          class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer"
+        >
+          Know More
+        </button>
+      </div>
+    `).join('');
+  }
+
+  handleSearch(e) {
+    e.preventDefault();
+    const formData = {
+      departure: document.getElementById('departure').value,
+      date: document.getElementById('date').value,
+      adult: document.getElementById('adult').value,
+      type: document.getElementById('type').value
+    };
+    // Implement search functionality here
+  }
+
+  setupEventListeners() {
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+      searchForm.addEventListener('submit', (e) => this.handleSearch(e));
     }
 
-    renderPackCards() {
-        const packData = [
-            {
-                image: '/img/packs/1.png',
-                icons: ['water'],
-                title: 'Nazaré Canyon',
-                date: '11 to 15 April',
-                price: '1760€'
-            },
-            {
-                image: '/img/packs/8.png',
-                icons: ['tree', 'water', 'mountain'],
-                title: 'The Heart of Alaska',
-                date: '11 to 15 April',
-                price: '1760€'
-            }
-            // Add more water packs as needed
-        ];
+    // Add event listeners for filter inputs if needed
+  }
 
-        const cardsContainer = document.getElementById('packCards');
-        cardsContainer.innerHTML = packData.map(pack => `
-            <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between"
-                style="background: url(${pack.image})">
-                <div class="flex items-center justify-center gap-3">
-                    ${pack.icons.map(icon => `
-                        <img src="/img/icon/ic-${icon}.svg" alt="${icon} Icon" width="34" />
-                    `).join('')}
-                </div>
-                <div class="text-center my-16">
-                    <h4 class="text-3xl font-semibold text-center">${pack.title}</h4>
-                    <p>${pack.date} / ${pack.price}</p>
-                </div>
-                <button type="submit"
-                    class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer">
-                    Know More
-                </button>
-            </div>
-        `).join('');
-    }
+  formatDateRange(startDate, endDate) {
+    const options = { day: 'numeric' };
+    const startDay = new Intl.DateTimeFormat('en-GB', options).format(new Date(startDate));
+    const endDay = new Intl.DateTimeFormat('en-GB', options).format(new Date(endDate));
+    const endMonth = new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(new Date(endDate));
 
-    handleSearch(e) {
-        e.preventDefault();
-        const formData = {
-            departure: document.getElementById('departure').value,
-            date: document.getElementById('date').value,
-            adult: document.getElementById('adult').value,
-            type: document.getElementById('type').value
-        };
-        console.log('Search form data:', formData);
-        // Implement search functionality here
-    }
-
-    setupEventListeners() {
-        const searchForm = document.getElementById('searchForm');
-        if (searchForm) {
-            searchForm.addEventListener('submit', (e) => this.handleSearch(e));
-        }
-
-        // Add event listeners for filter inputs if needed
-    }
+    return `${startDay} to ${endDay} ${endMonth}`;
+  }
 }
 
 // Initialize the view when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new WaterPacksView();
+  new WaterPacksView();
 });
 
 export default WaterPacksView;

@@ -1,9 +1,9 @@
 class BaseView {
-  renderView() {
+  async renderView() {
     const container = document.querySelector('main');
     if (!container) return;
 
-    container.innerHTML = this.getTemplate();
+    container.innerHTML = await this.getTemplate();
   }
 
   initializeEventListeners() {
