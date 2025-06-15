@@ -1,56 +1,23 @@
-class FlightsAdminView {
-    constructor() {
-        this.renderView();
-        this.initializeEventListeners();
-    }
+import BaseAdminView from '/js/views/admin/BaseAdminView.js';
+import FlightsModel from '/js/models/FlightsModel.js';
+import ModalView from '/js/views/components/ModalView.js';
 
-    initializeEventListeners() {
-        // Add Entry button
-        const addEntryButtons = document.querySelectorAll('button:contains("Add Entry")');
-        addEntryButtons.forEach(button => {
-            button.addEventListener('click', () => this.handleAddEntry());
-        });
+class FlightsAdminView extends BaseAdminView {
+  constructor({ model }) {
+    super();
+    this.model = model;
+    Promise.all([
+      this.renderView(),
+    ]).then(() => {
+      this.initializeEventListeners();
+    });
+  }
 
-        // Edit buttons
-        const editButtons = document.querySelectorAll('img[alt="Edit Icon"]');
-        editButtons.forEach(button => {
-            button.closest('button').addEventListener('click', (e) => {
-                const row = e.target.closest('tr');
-                this.handleEdit(row);
-            });
-        });
-
-        // Delete buttons
-        const deleteButtons = document.querySelectorAll('img[alt="Delete Icon"]');
-        deleteButtons.forEach(button => {
-            button.closest('button').addEventListener('click', (e) => {
-                const row = e.target.closest('tr');
-                this.handleDelete(row);
-            });
-        });
-
-        // Navigation buttons
-        const navButtons = document.querySelectorAll('ul button');
-        navButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const page = e.target.textContent.trim().toLowerCase();
-                this.handleNavigation(page);
-            });
-        });
-    }
-
-    renderView() {
-        const mainContent = document.querySelector('section');
-        if (!mainContent) return;
-
-        mainContent.innerHTML = this.getTemplate();
-    }
-
-    getTemplate() {
-        return `
+  async getTemplate() {
+    return `
             <div class="mt-8 flex items-center gap-5 justify-between">
                 <h4 class="text-3xl font-semibold">Dashboard</h4>
-                <button type="button" class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:hidden block">
+                <button id="addEntryButton" type="button" class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:hidden block">
                     Add Entry
                 </button>
             </div>
@@ -94,7 +61,7 @@ class FlightsAdminView {
                     </li>
                 </ul>
 
-                <button type="button" class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:block hidden">
+                <button id="addEntryButton" type="button" class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:block hidden">
                     Add Entry
                 </button>
             </div>
@@ -151,68 +118,46 @@ class FlightsAdminView {
                 </table>
             </div>
         `;
-    }
+  }
 
-    getFlightRows() {
-        // This would typically fetch data from an API
-        const flights = [
-            {
-                departure: { location: 'Porto', date: '04/05/2025', time: '23:30' },
-                arrival: { location: 'Rome', date: '04/05/2025', time: '03:00' },
-                price: '210€'
-            },
-            {
-                departure: { location: 'Porto', date: '04/05/2025', time: '23:30' },
-                arrival: { location: 'Rome', date: '04/05/2025', time: '03:00' },
-                price: '210€'
-            },
-            {
-                departure: { location: 'Porto', date: '04/05/2025', time: '23:30' },
-                arrival: { location: 'Rome', date: '04/05/2025', time: '03:00' },
-                price: '210€'
-            },
-            {
-                departure: { location: 'Porto', date: '04/05/2025', time: '23:30' },
-                arrival: { location: 'Rome', date: '04/05/2025', time: '03:00' },
-                price: '210€'
-            }
-        ];
+  getFlightRows() {
+    const flights = this.model.getAll();
 
-        return flights.map((flight, index) => `
-            <tr>
+    return flights.map((flight, index) => `
+            <tr id="flight-${flight.id}">
                 <td>
                     <div class="border-s p-4 ${index % 2 === 0 ? 'bg-[var(--light-bg-color)]' : ''} text-nowrap border-b border-b-[var(--primary-color)] ${index === flights.length - 1 ? 'rounded-bl-md' : ''}">
-                        ${flight.departure.location}
+                        ${flight.departure}
                     </div>
                 </td>
                 <td>
                     <div class="p-4 ${index % 2 === 0 ? 'bg-[var(--light-bg-color)]' : ''} text-nowrap border-b border-b-[var(--primary-color)]">
-                        ${flight.departure.date}
+                        ${flight.departureDate}
                     </div>
                 </td>
                 <td>
                     <div class="p-4 ${index % 2 === 0 ? 'bg-[var(--light-bg-color)]' : ''} text-nowrap border-b border-b-[var(--primary-color)] truncate">
-                        ${flight.departure.time}
+                        ${flight.departureTime}
                     </div>
                 </td>
                 <td>
                     <div class="p-4 ${index % 2 === 0 ? 'bg-[var(--light-bg-color)]' : ''} text-nowrap border-b border-b-[var(--primary-color)]">
-                        ${flight.arrival.location}
+                        ${flight.arrival}
                     </div>
                 </td>
                 <td>
                     <div class="p-4 ${index % 2 === 0 ? 'bg-[var(--light-bg-color)]' : ''} text-nowrap border-b border-b-[var(--primary-color)]">
-                        ${flight.arrival.date}
+                        ${flight.arrivalDate}
                     </div>
                 </td>
                 <td>
                     <div class="p-4 ${index % 2 === 0 ? 'bg-[var(--light-bg-color)]' : ''} text-nowrap border-b border-b-[var(--primary-color)]">
-                        ${flight.arrival.time}
+                        ${flight.arrivalTime}
                     </div>
                 </td>
                 <td>
                     <div class="p-4 ${index % 2 === 0 ? 'bg-[var(--light-bg-color)]' : ''} text-nowrap border-b border-b-[var(--primary-color)]">
-                        ${flight.price}
+                        ${flight.price}€
                     </div>
                 </td>
                 <td>
@@ -227,50 +172,100 @@ class FlightsAdminView {
                 </td>
             </tr>
         `).join('');
-    }
+  }
 
-    handleAddEntry() {
-        // Implement add flight functionality
-        console.log('Adding new flight');
-    }
+  handleAddEntry() {
+    new ModalView({
+      title: 'Add Flight',
+      fields: {
+        departure: {
+          type: 'text',
+          label: 'Departure Location',
+        },
+        departureDate: {
+          type: 'date',
+          label: 'Departure Date',
+        },
+        departureTime: {
+          type: 'time',
+          label: 'Departure Time',
+        },
+        arrival: {
+          type: 'text',
+          label: 'Arrival Location',
+        },
+        arrivalDate: {
+          type: 'date',
+          label: 'Arrival Date',
+        },
+        arrivalTime: {
+          type: 'time',
+          label: 'Arrival Time',
+        },
+        price: {
+          type: 'number',
+          label: 'Price (€)',
+        },
+      },
+      onSubmit: (data) => {
+        this.model.create(data);
+        this.hydrateView();
+      }
+    }).show();
+  }
 
-    handleEdit(row) {
-        const flightData = {
-            departureLocation: row.querySelector('td:nth-child(1)').textContent.trim(),
-            departureDate: row.querySelector('td:nth-child(2)').textContent.trim(),
-            departureTime: row.querySelector('td:nth-child(3)').textContent.trim(),
-            arrivalLocation: row.querySelector('td:nth-child(4)').textContent.trim(),
-            arrivalDate: row.querySelector('td:nth-child(5)').textContent.trim(),
-            arrivalTime: row.querySelector('td:nth-child(6)').textContent.trim(),
-            price: row.querySelector('td:nth-child(7)').textContent.trim()
-        };
-        console.log('Editing flight:', flightData);
-    }
+  handleEdit(row) {
+    const flightId = parseInt(row.id.split('-')[1]);
+    const flight = this.model.getByPk(flightId);
 
-    handleDelete(row) {
-        const flightInfo = `${row.querySelector('td:nth-child(1)').textContent.trim()} to ${row.querySelector('td:nth-child(4)').textContent.trim()}`;
-        if (confirm(`Are you sure you want to delete the flight "${flightInfo}"?`)) {
-            console.log('Deleting flight:', flightInfo);
-            // Implement delete functionality
-        }
-    }
-
-    handleNavigation(page) {
-        const routes = {
-            'packs': 'packs.html',
-            'categories': 'categories.html',
-            'flights': 'flights.html',
-            'users': 'users.html',
-            'search': 'search.html'
-        };
-
-        if (routes[page]) {
-            window.location.href = routes[page];
-        }
-    }
+    new ModalView({
+      title: 'Edit Flight',
+      fields: {
+        'departure.location': {
+          type: 'text',
+          label: 'Departure Location',
+          value: flight.departure
+        },
+        'departure.date': {
+          type: 'date',
+          label: 'Departure Date',
+          value: flight.departureDate
+        },
+        'departure.time': {
+          type: 'time',
+          label: 'Departure Time',
+          value: flight.departureTime
+        },
+        'arrival.location': {
+          type: 'text',
+          label: 'Arrival Location',
+          value: flight.arrival
+        },
+        'arrival.date': {
+          type: 'date',
+          label: 'Arrival Date',
+          value: flight.arrivalDate
+        },
+        'arrival.time': {
+          type: 'time',
+          label: 'Arrival Time',
+          value: flight.arrivalTime
+        },
+        price: {
+          type: 'number',
+          label: 'Price (€)',
+          value: flight.price
+        },
+      },
+      onSubmit: (data) => {
+        this.model.update(flightId, data);
+        this.hydrateView();
+      }
+    }).show();
+  }
 }
 
 // Initialize the view when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new FlightsAdminView();
+  new FlightsAdminView({ model: FlightsModel });
 });
