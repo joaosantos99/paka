@@ -1,22 +1,45 @@
+import HeaderView from '/js/views/HeaderView.js';
+import PackModel from '/js/models/PackModel.js';
+import FileStorage from '/js/utilities/FileStorage.js';
+
 class SinglePackView {
-    constructor() {
-        this.render();
-        this.setupEventListeners();
+  constructor() {
+    this.packId = null;
+    this.pack = null;
+
+    const search = window.location.search;
+    if (search) {
+      const searchParams = new URLSearchParams(search);
+      this.packId = searchParams.get('id');
     }
 
-    render() {
-        const main = document.querySelector('main');
-        main.innerHTML = `
+    if (!this.packId) {
+      window.location.href = '/html/404.html';
+    }
+
+    this.pack = PackModel.getByPk(parseInt(this.packId));
+    console.log(this.pack);
+
+    Promise.all([this.render()])
+      .then(() => {
+        this.setupEventListeners();
+      });
+  }
+
+  async render() {
+    const main = document.querySelector('main');
+    main.innerHTML = `
             <!-- Header + Search Section Start -->
-            <div class="sm:min-h-[750px] !bg-no-repeat !bg-cover !bg-center" style="background: url(/img/pack-hero-bg.png)">
+            <div class="sm:min-h-[750px] !bg-no-repeat !bg-cover !bg-center" style="background: url(${await this.getImagePath(this.pack.featuredImage)})">
+                <div id="lightHeaderContainer"></div>
                 <div class="md:my-40 sm:my-44 mt-20 px-4">
                     <img src="/img/icon/ic-cactus.svg" alt="Cactus Img" width="82" class="mx-auto" />
                     <h1 class="md:text-6xl sm:text-5xl text-4xl max-w-2xl mx-auto text-center uppercase font-semibold text-[var(--screen-bg)] mt-3">
-                        Petra and the Desert of Wadi Rum
+                        ${this.pack.name}
                     </h1>
                     <button type="submit"
                         class="bg-[var(--primary-color)] text-white rounded-md h-11 px-6 mt-3 sm:w-fit w-full mx-auto block cursor-pointer font-medium">
-                        11 to 15 April | 1600€
+                        ${this.formatDateRange(this.pack.startDate, this.pack.endDate)} | ${this.pack.price}€
                     </button>
                 </div>
 
@@ -50,15 +73,10 @@ class SinglePackView {
             <div class="relative">
                 <section class="max-w-7xl px-4 mx-auto lg:pt-24 sm:pt-14 pt-52 md:pb-24 pb-14 grid md:grid-cols-2 items-center gap-5">
                     <h3 class="md:text-5xl text-4xl font-semibold md:mb-4 md:leading-14 md:w-9/12 z-10 relative text-[var(--secondary-color)]">
-                        Along the King's Highway
+                        ${this.pack.title}
                     </h3>
                     <p class="text-base">
-                        We travel along the ancient King's Highway, where for centuries thousands of camel caravans journeyed.
-                        The destination is the sculptural and imposing Petra, carved into the rock by the Nabataeans and later
-                        occupied by the Romans. We let ourselves be amazed by the landscape of one of the world's most scenic
-                        deserts: Wadi Rum. In the company of the Bedouin people, we experience the routines of desert life and
-                        sleep under an impressive star-filled sky. The journey ends with a dip in the Dead Sea, the lowest point
-                        on the planet.
+                        ${this.pack.description}
                     </p>
                 </section>
             </div>
@@ -72,24 +90,8 @@ class SinglePackView {
             </section>
             <!-- Image Carousel Section End -->
 
-            <!-- Itinerary Section Start -->
-            <section class="py-12">
-                <div class="max-w-7xl px-4 mx-auto">
-                    <h4 class="md:text-5xl text-4xl font-semibold">Itinerary</h4>
-                    <div class="mt-8 grid md:grid-cols-2 gap-6">
-                        <div id="itineraryAccordion">
-                            <!-- Itinerary items will be dynamically inserted here -->
-                        </div>
-                        <div>
-                            <img src="/img/map.png" alt="Map" class="w-full" />
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- Itinerary Section End -->
-
             <!-- Similar Packs Section Start -->
-            <section class="bg-[var(--light-bg-color)] py-12 overflow-x-hidden">
+            <section class="py-12 overflow-x-hidden">
                 <div class="max-w-7xl px-4 mx-auto flex md:items-center gap-6 md:flex-row flex-col">
                     <h4 class="md:text-4xl text-3xl font-semibold min-w-xs">
                         You may <span class="md:block hidden"></span> also Like!
@@ -102,89 +104,52 @@ class SinglePackView {
             <!-- Similar Packs Section End -->
         `;
 
-        this.renderImageCarousel();
-        this.renderItinerary();
-        this.renderSimilarPacks();
-    }
+    await this.renderImageCarousel();
+    this.renderSimilarPacks();
+    new HeaderView();
+  }
 
-    renderImageCarousel() {
-        const images = [
-            '/img/contact-hero-bg.png',
-            '/img/desert-hero-bg.png',
-            '/img/desert-hero-bg.png'
-        ];
+  async renderImageCarousel() {
+    const images = await Promise.all(this.pack.images.map(async image => await this.getImagePath(image)));
 
-        const carouselContainer = document.getElementById('imageCarousel');
-        carouselContainer.innerHTML = images.map(image => `
+    const carouselContainer = document.getElementById('imageCarousel');
+    carouselContainer.innerHTML = images.map(image => `
             <img src="${image}" alt="Pack Image" class="md:w-2/5 sm:w-3/5 w-4/5" />
         `).join('');
-    }
+  }
 
-    renderItinerary() {
-        const itineraryData = [
-            {
-                day: 'Day 1 - Arrival in Amman',
-                description: 'Welcome to Jordan! Upon arrival at Queen Alia International Airport, youll be greeted by our local team and transferred to your hotel in Amman. Depending on arrival time, enjoy a welcome briefing with your guide and fellow travelers. The evening is free to rest or explore the vibrant streets of the capital, a city where modern life meets ancient heritage.'
-            },
-            {
-                day: 'Day 2 - The Kings Highway to Petra',
-                description: ''
-            },
-            {
-                day: 'Day 3 - Explore Petra',
-                description: ''
-            },
-            {
-                day: 'Day 4 - Wadi Rum Desert Adventure',
-                description: ''
-            },
-            {
-                day: 'Day 5 - Dead Sea and Departure',
-                description: ''
-            }
-        ];
+  async getImagePath(image) {
+    const imageFile = await FileStorage.getFile(image);
+    return imageFile ? URL.createObjectURL(imageFile) : null;
+  }
 
-        const accordionContainer = document.getElementById('itineraryAccordion');
-        accordionContainer.innerHTML = itineraryData.map((item, index) => `
-            <div class="mb-3">
-                <button type="button" data-day="${index}"
-                    class="bg-[var(--primary-color)] text-white rounded-md h-14 px-4 sm:text-lg text-base w-full text-start cursor-pointer font-medium itinerary-btn">
-                    ${item.day}
-                </button>
-                <p class="px-4 text-base mt-3 mb-6 ${index === 0 ? '' : 'hidden'}" data-content="${index}">
-                    ${item.description}
-                </p>
-            </div>
-        `).join('');
-    }
+  renderSimilarPacks() {
+    const similarPacksData = [
+      {
+        image: '/img/packs/3.png',
+        icons: ['cactus', 'tree'],
+        title: 'Pack Name',
+        date: '11 to 15 April',
+        price: '1760€'
+      },
+      {
+        image: '/img/packs/3.png',
+        icons: ['cactus', 'tree'],
+        title: 'Pack Name',
+        date: '11 to 15 April',
+        price: '1760€'
+      },
+      {
+        image: '/img/packs/3.png',
+        icons: ['cactus', 'tree'],
+        title: 'Pack Name',
+        date: '11 to 15 April',
+        price: '1760€'
+      }
+    ];
 
-    renderSimilarPacks() {
-        const similarPacksData = [
-            {
-                image: '/img/packs/3.png',
-                icons: ['cactus', 'tree'],
-                title: 'Pack Name',
-                date: '11 to 15 April',
-                price: '1760€'
-            },
-            {
-                image: '/img/packs/3.png',
-                icons: ['cactus', 'tree'],
-                title: 'Pack Name',
-                date: '11 to 15 April',
-                price: '1760€'
-            },
-            {
-                image: '/img/packs/3.png',
-                icons: ['cactus', 'tree'],
-                title: 'Pack Name',
-                date: '11 to 15 April',
-                price: '1760€'
-            }
-        ];
-
-        const packsContainer = document.getElementById('similarPacks');
-        packsContainer.innerHTML = similarPacksData.map(pack => `
+    const packsContainer = document.getElementById('similarPacks');
+    packsContainer.innerHTML = similarPacksData.map(pack => `
             <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between md:min-w-md"
                 style="background: url(${pack.image})">
                 <div class="flex items-center justify-center gap-3">
@@ -202,41 +167,51 @@ class SinglePackView {
                 </button>
             </div>
         `).join('');
+  }
+
+  handleReservation(e) {
+    e.preventDefault();
+    const formData = {
+      departure: document.getElementById('departure').value,
+      date: document.getElementById('date').value,
+      adult: document.getElementById('adult').value
+    };
+    console.log('Reservation form data:', formData);
+    // Implement reservation functionality here
+  }
+
+  toggleItineraryContent(button) {
+    const dayIndex = button.dataset.day;
+    const content = document.querySelector(`[data-content="${dayIndex}"]`);
+    content.classList.toggle('hidden');
+  }
+
+  setupEventListeners() {
+    const reservationForm = document.getElementById('reservationForm');
+    if (reservationForm) {
+      reservationForm.addEventListener('submit', (e) => this.handleReservation(e));
     }
 
-    handleReservation(e) {
-        e.preventDefault();
-        const formData = {
-            departure: document.getElementById('departure').value,
-            date: document.getElementById('date').value,
-            adult: document.getElementById('adult').value
-        };
-        console.log('Reservation form data:', formData);
-        // Implement reservation functionality here
-    }
+    const itineraryButtons = document.querySelectorAll('.itinerary-btn');
+    itineraryButtons.forEach(button => {
+      button.addEventListener('click', () => this.toggleItineraryContent(button));
+    });
+  }
 
-    toggleItineraryContent(button) {
-        const dayIndex = button.dataset.day;
-        const content = document.querySelector(`[data-content="${dayIndex}"]`);
-        content.classList.toggle('hidden');
-    }
 
-    setupEventListeners() {
-        const reservationForm = document.getElementById('reservationForm');
-        if (reservationForm) {
-            reservationForm.addEventListener('submit', (e) => this.handleReservation(e));
-        }
+  formatDateRange(startDate, endDate) {
+    const options = { day: 'numeric' };
+    const startDay = new Intl.DateTimeFormat('en-GB', options).format(new Date(startDate));
+    const endDay = new Intl.DateTimeFormat('en-GB', options).format(new Date(endDate));
+    const endMonth = new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(new Date(endDate));
 
-        const itineraryButtons = document.querySelectorAll('.itinerary-btn');
-        itineraryButtons.forEach(button => {
-            button.addEventListener('click', () => this.toggleItineraryContent(button));
-        });
-    }
+    return `${startDay} to ${endDay} ${endMonth}`;
+  }
 }
 
 // Initialize the view when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new SinglePackView();
+  new SinglePackView();
 });
 
 export default SinglePackView;
