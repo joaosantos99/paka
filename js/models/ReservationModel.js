@@ -11,7 +11,7 @@ class ReservationModel extends BaseModel {
     userId,
     packId,
     departureFlightId,
-    returnFlightId,
+    arrivalFlightId,
     numberOfPeople,
   }) {
     const reservations = LocalStorageCRUD.read(this.modelName);
@@ -22,7 +22,7 @@ class ReservationModel extends BaseModel {
       userId,
       packId,
       departureFlightId,
-      returnFlightId,
+      arrivalFlightId,
       numberOfPeople,
       deleted: false,
     }

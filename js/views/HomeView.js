@@ -34,7 +34,7 @@ export default class HomeView {
                         <input type="date" name="departingDate" id="departingDate"
                             class="h-full p-3.5 focus-within:outline-0 text-sm w-full bg-transparent border-0"
                             placeholder="Start Date"
-+                        />
+                    />
                     </div>
                     <div class="h-8 w-[1px] bg-gray-500"></div>
                     <div class="w-1/2">

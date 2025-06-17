@@ -1,11 +1,18 @@
 import HeaderView from '/js/views/HeaderView.js';
 import PackModel from '/js/models/PackModel.js';
 import FileStorage from '/js/utilities/FileStorage.js';
+import FlightsModel from '/js/models/FlightsModel.js';
+import ReservationModel from '/js/models/ReservationModel.js';
+import LocalStorageCRUD from '/js/utilities/crud.js';
 
 class SinglePackView {
   constructor() {
+    this.flightsModel = FlightsModel;
+    this.reservationModel = ReservationModel;
     this.packId = null;
     this.pack = null;
+    this.userId = LocalStorageCRUD.read('user');
+    this.isAlreadyReserved = false;
 
     const search = window.location.search;
     if (search) {
@@ -17,8 +24,11 @@ class SinglePackView {
       window.location.href = '/html/404.html';
     }
 
+    const reservations = this.reservationModel.getByPackId(this.packId);
+    this.isAlreadyReserved = reservations.filter(reservation => reservation.userId === this.userId).length > 0;
+    console.log(this.isAlreadyReserved);
+
     this.pack = PackModel.getByPk(parseInt(this.packId));
-    console.log(this.pack);
 
     Promise.all([this.render()])
       .then(() => {
@@ -32,33 +42,39 @@ class SinglePackView {
             <!-- Header + Search Section Start -->
             <div class="sm:min-h-[750px] !bg-no-repeat !bg-cover !bg-center" style="background: url(${await this.getImagePath(this.pack.featuredImage)})">
                 <div id="lightHeaderContainer"></div>
-                <div class="md:my-40 sm:my-44 mt-20 px-4">
+                <div class="sm:my-50 mt-20 px-4">
                     <img src="/img/icon/ic-cactus.svg" alt="Cactus Img" width="82" class="mx-auto" />
                     <h1 class="md:text-6xl sm:text-5xl text-4xl max-w-2xl mx-auto text-center uppercase font-semibold text-[var(--screen-bg)] mt-3">
                         ${this.pack.name}
                     </h1>
-                    <button type="submit"
-                        class="bg-[var(--primary-color)] text-white rounded-md h-11 px-6 mt-3 sm:w-fit w-full mx-auto block cursor-pointer font-medium">
+                    <div
+                        class="flex items-center justify-center bg-[var(--primary-color)] text-white rounded-md h-11 px-6 mt-3 sm:w-fit w-full mx-auto block font-medium">
                         ${this.formatDateRange(this.pack.startDate, this.pack.endDate)} | ${this.pack.price}€
-                    </button>
+                    </div>
                 </div>
 
                 <!-- Search Filter Section Start -->
-                <section class="sm:translate-y-0 bg-[var(--light-bg-color)]">
+                <section class="relative z-999 sm:translate-y-0 bg-[var(--light-bg-color)]">
                     <div class="max-w-7xl px-4 mx-auto p-4 rounded-md">
                         <form id="reservationForm">
                             <div class="grid sm:grid-cols-4 md:gap-6 gap-2">
                                 <input type="text" name="departure" id="departure"
                                     class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                                    placeholder="Departure" />
-                                <input type="text" name="date" id="date"
+                                    placeholder="Departure"
+                                />
+                                <div class="relative">
+                                  <input type="text" name="arrival" id="arrival"
+                                      class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
+                                      placeholder="Arrival"
+                                  />
+                                </div>
+                                <input type="number" name="numberOfPeople" id="numberOfPeople"
                                     class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                                    placeholder="Returning" />
-                                <input type="text" name="adult" id="adult"
-                                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                                    placeholder="1 Adult" />
+                                    placeholder="1 Person" />
                                 <button type="submit"
-                                    class="bg-[var(--secondary-color)] text-white rounded-md h-12 px-10 w-full cursor-pointer">
+                                    class="bg-[var(--secondary-color)] text-white rounded-md h-12 px-10 w-full cursor-pointer hover:bg-transparent hover:text-[var(--secondary-color)] hover:border-2 hover:border-[var(--secondary-color)] transition-colors duration-200 ${this.isAlreadyReserved ? 'opacity-50 cursor-not-allowed bg-[var(--secondary-color)]' : ''} "
+                                    disabled=${this.isAlreadyReserved ? 'true' : 'false'}
+                                    >
                                     Add Reservations
                                 </button>
                             </div>
@@ -171,13 +187,17 @@ class SinglePackView {
 
   handleReservation(e) {
     e.preventDefault();
-    const formData = {
-      departure: document.getElementById('departure').value,
-      date: document.getElementById('date').value,
-      adult: document.getElementById('adult').value
-    };
-    console.log('Reservation form data:', formData);
-    // Implement reservation functionality here
+    const departureFlightId = document.getElementById('departure').dataset.flightId;
+    const arrivalFlightId = document.getElementById('arrival').dataset.flightId;
+    const numberOfPeople = document.getElementById('numberOfPeople').value;
+
+    this.reservationModel.create({
+      userId: LocalStorageCRUD.read('user'),
+      packId: this.packId,
+      departureFlightId: departureFlightId || null,
+      arrivalFlightId: arrivalFlightId || null,
+      numberOfPeople: numberOfPeople || 1,
+    });
   }
 
   toggleItineraryContent(button) {
@@ -196,6 +216,123 @@ class SinglePackView {
     itineraryButtons.forEach(button => {
       button.addEventListener('click', () => this.toggleItineraryContent(button));
     });
+
+    // Add autocomplete for arrival input
+    const arrivalInput = document.getElementById('arrival');
+    if (arrivalInput) {
+      arrivalInput.addEventListener('input', (e) => this.handleArrivalInput(e));
+    }
+
+    // Add autocomplete for departure input
+    const departureInput = document.getElementById('departure');
+    if (departureInput) {
+      departureInput.addEventListener('input', (e) => this.handleDepartureInput(e));
+    }
+  }
+
+  handleArrivalInput(e) {
+    const input = e.target.value.toLowerCase();
+    const flights = this.flightsModel.getAll();
+
+    // Get the last stop of the current pack
+    const lastStop = this.pack.stops[this.pack.stops.length - 1];
+    if (!lastStop) return;
+
+    // Get all flights that depart from the last stop
+    const flightsFromLastStop = flights.filter(flight => flight.departure === lastStop);
+    const uniqueArrivals = [...new Set(flightsFromLastStop.map(flight => flight.arrival))];
+
+    // Show all arrivals if input is empty, otherwise filter
+    const matches = input.length > 0
+      ? uniqueArrivals.filter(arrival => arrival.toLowerCase().includes(input))
+      : uniqueArrivals;
+
+    if (matches.length > 0) {
+      const list = document.createElement('ul');
+      list.id = 'arrival-autocomplete';
+      list.className = 'absolute top-10 z-10 w-80 bg-[var(--light-bg-color)] border border-[var(--primary-color)] rounded-md mt-1 max-h-60 overflow-auto shadow-lg';
+
+      // Ensure the input container has proper positioning
+      const inputContainer = e.target.parentNode;
+      if (!inputContainer.style.position) {
+        inputContainer.style.position = 'relative';
+      }
+
+      matches.forEach(match => {
+        const item = document.createElement('li');
+        item.className = 'px-4 py-3 text-sm hover:bg-[var(--secondary-color)] hover:text-[var(--screen-bg)] cursor-pointer transition-colors duration-200';
+        const text = `${match} | ${flightsFromLastStop.find(flight => flight.arrival === match).price}€`;
+        item.textContent = text;
+        item.addEventListener('click', () => {
+          e.target.value = text;
+          e.target.dataset.flightId = flightsFromLastStop.find(flight => flight.arrival === match).id;
+          list.remove();
+        });
+        list.appendChild(item);
+      });
+
+      // Remove any existing autocomplete list
+      const existingList = document.getElementById('arrival-autocomplete');
+      if (existingList) {
+        existingList.remove();
+      }
+
+      // Insert the list after the input
+      inputContainer.appendChild(list);
+    }
+  }
+
+  handleDepartureInput(e) {
+    const input = e.target.value.toLowerCase();
+    const flights = this.flightsModel.getAll();
+
+    // Get the first stop of the current pack
+    const firstStop = this.pack.stops[0];
+    if (!firstStop) return;
+
+    // Get all flights that arrive at the first stop
+    const flightsToFirstStop = flights.filter(flight => flight.arrival === firstStop);
+    const uniqueDepartures = [...new Set(flightsToFirstStop.map(flight => flight.departure))];
+
+    // Show all departures if input is empty, otherwise filter
+    const matches = input.length > 0
+      ? uniqueDepartures.filter(departure => departure.toLowerCase().includes(input))
+      : uniqueDepartures;
+
+    if (matches.length > 0) {
+      const list = document.createElement('ul');
+      list.id = 'departure-autocomplete';
+      list.className = 'absolute top-10 z-10 w-80 bg-[var(--light-bg-color)] border border-[var(--primary-color)] rounded-md mt-1 max-h-60 overflow-auto shadow-lg';
+
+      // Ensure the input container has proper positioning
+      const inputContainer = e.target.parentNode;
+      if (!inputContainer.style.position) {
+        inputContainer.style.position = 'relative';
+      }
+
+      matches.forEach(match => {
+        const item = document.createElement('li');
+        item.className = 'px-4 py-3 text-sm hover:bg-[var(--secondary-color)] hover:text-[var(--screen-bg)] cursor-pointer transition-colors duration-200';
+        const text = `${match} | ${flightsToFirstStop.find(flight => flight.departure === match).price}€`;
+        item.dataset.flightId = flightsToFirstStop.find(flight => flight.departure === match).id;
+        item.textContent = text;
+        item.addEventListener('click', () => {
+          e.target.value = text;
+          e.target.dataset.flightId = flightsToFirstStop.find(flight => flight.departure === match).id;
+          list.remove();
+        });
+        list.appendChild(item);
+      });
+
+      // Remove any existing autocomplete list
+      const existingList = document.getElementById('departure-autocomplete');
+      if (existingList) {
+        existingList.remove();
+      }
+
+      // Insert the list after the input
+      inputContainer.appendChild(list);
+    }
   }
 
 
