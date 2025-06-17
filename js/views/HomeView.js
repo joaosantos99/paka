@@ -1,34 +1,21 @@
+import HeaderModel from '/js/views/HeaderView.js';
+import FlightsModel from '/js/models/FlightsModel.js';
+import CategoryModel from '/js/models/CategoryModel.js';
+
 export default class HomeView {
   constructor() {
+    this.flightsModel = FlightsModel;
+    this.categoryModel = CategoryModel;
+
     this.render();
     this.addEventListeners();
-}
+    new HeaderModel();
+  }
 
   getTemplate = () => `
     <!-- Header + Search Section Start -->
     <div class="sm:min-h-[750px] !bg-no-repeat !bg-cover !bg-center" style="background: url(../img/home-hero-bg.png)">
-      <!-- Header Section Start -->
-      <header class="sm:py-7 py-6">
-        <nav class="flex items-center gap-5 justify-between max-w-7xl px-4 mx-auto">
-          <a href="#">
-            <img src="../img/light-logo.svg" alt="Logo" />
-          </a>
-
-          <ul class="sm:flex hidden gap-6 items-center text-[var(--screen-bg)]">
-            <li><a href="#" class="text-sm">Mountains</a></li>
-            <li><a href="#" class="text-sm">Water</a></li>
-            <li><a href="#" class="text-sm">Deserts</a></li>
-            <li><a href="#" class="text-sm">Forests</a></li>
-            <li><a href="#" class="text-sm">Contacts</a></li>
-          </ul>
-
-          <a href="#">
-            <img src="../img/icon/ic-user-light.svg" alt="User Icon" class="sm:block hidden" />
-            <img src="../img/icon/ic-toggle-light.svg" alt="Toggle Icon" class="sm:hidden block" />
-          </a>
-        </nav>
-      </header>
-      <!-- Header Section End -->
+      <div id="lightHeaderContainer"></div>
 
       <!-- Search Filter Section Start -->
       <section class="max-w-7xl px-4 mx-auto sm:mt-[450px] mt-40 sm:translate-y-0 translate-y-40">
@@ -38,10 +25,41 @@ export default class HomeView {
           <form class="grid sm:grid-cols-12 md:gap-6 gap-2">
             <div class="sm:col-span-10">
               <div class="grid sm:grid-cols-4 md:gap-6 gap-2">
-                <input type="text" name="departure" id="departure" class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]" placeholder="Departure" />
-                <input type="text" name="date" id="date" class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]" placeholder="Date" />
-                <input type="text" name="adult" id="adult" class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]" placeholder="1 Adult" />
-                <input type="text" name="type" id="type" class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]" placeholder="Type" />
+                <input type="text" name="departure" id="departure"
+                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
+                    placeholder="Departure"
+                />
+                <div class="border rounded-md h-12 bg-[var(--screen-bg)] flex items-center justify-between">
+                    <div class="w-1/2">
+                        <input type="date" name="departingDate" id="departingDate"
+                            class="h-full p-3.5 focus-within:outline-0 text-sm w-full bg-transparent border-0"
+                            placeholder="Start Date"
++                        />
+                    </div>
+                    <div class="h-8 w-[1px] bg-gray-500"></div>
+                    <div class="w-1/2">
+                        <input type="date" name="returningDate" id="returningDate"
+                            class="h-full p-3.5 focus-within:outline-0 text-sm w-full bg-transparent border-0"
+                            placeholder="End Date"
+                        />
+                    </div>
+                </div>
+                <input type="number" name="numberOfPeople" id="numberOfPeople"
+                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
+                    placeholder="1 Person"
+                />
+                <select name="category" id="category"
+                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]">
+                    <option value="all">All Categories</option>
+                    ${CategoryModel.getAll().map(category => `
+                        <option
+                          ${this.categoryKey === category.name ? 'selected' : ''}
+                          value="${category.name}"
+                        >
+                          ${category.name}
+                        </option>
+                    `).join('')}
+                </select>
               </div>
             </div>
 
@@ -215,16 +233,79 @@ export default class HomeView {
     </section>
   `;
 
+  handleDepartureInput(e) {
+    const input = e.target.value.toLowerCase();
+    const flights = this.flightsModel.getAll();
+    const uniqueDepartures = [...new Set(flights.map(flight => flight.departure))];
+    const matches = uniqueDepartures.filter(departure =>
+      departure.toLowerCase().includes(input)
+    );
+
+    if (matches.length > 0 && input.length > 0) {
+      const list = document.createElement('ul');
+      list.id = 'departure-autocomplete';
+      list.className = 'absolute top-10 z-10 w-80 bg-[var(--light-bg-color)] border border-[var(--primary-color)] rounded-md mt-1 max-h-60 overflow-auto shadow-lg';
+
+      // Ensure the input container has proper positioning
+      const inputContainer = e.target.parentNode;
+      if (!inputContainer.style.position) {
+        inputContainer.style.position = 'relative';
+      }
+
+      matches.forEach(match => {
+        const item = document.createElement('li');
+        item.className = 'px-4 py-3 text-sm hover:bg-[var(--secondary-color)] hover:text-[var(--screen-bg)] cursor-pointer transition-colors duration-200';
+        item.textContent = match;
+        item.addEventListener('click', () => {
+          e.target.value = match;
+          list.remove();
+        });
+        list.appendChild(item);
+      });
+
+      // Remove any existing autocomplete list
+      const existingList = document.getElementById('departure-autocomplete');
+      if (existingList) {
+        existingList.remove();
+      }
+
+      // Insert the list after the input
+      inputContainer.appendChild(list);
+    }
+  }
+
   addEventListeners() {
     const searchForm = document.querySelector('form');
     if (searchForm) {
       searchForm.addEventListener('submit', this.handleSearch);
     }
+
+    // Add autocomplete for departure input
+    const departureInput = document.getElementById('departure');
+    if (departureInput) {
+      departureInput.addEventListener('input', (e) => this.handleDepartureInput(e));
+    }
   }
 
   handleSearch = (e) => {
     e.preventDefault();
-    // Handle search form submission
+    const formData = {
+      departure: document.getElementById('departure').value,
+      departingDate: document.getElementById('departingDate').value,
+      returningDate: document.getElementById('returningDate').value,
+      numberOfPeople: document.getElementById('numberOfPeople').value,
+      category: document.getElementById('category').value,
+    };
+
+    const queryParams = new URLSearchParams();
+
+    Object.keys(formData).forEach(key => {
+      if (formData[key]) {
+        queryParams.set(key, formData[key]);
+      }
+    });
+
+    window.location = `/html/category.html?${queryParams.toString()}`;
   }
 
   render() {

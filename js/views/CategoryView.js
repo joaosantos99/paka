@@ -207,13 +207,12 @@ class WaterPacksView {
           <h4 class="text-3xl font-semibold text-center">${pack.title}</h4>
           <p>${this.formatDateRange(pack.startDate, pack.endDate)} / ${pack.price}€</p>
         </div>
-        <button
-          type="button"
-          data-id="${pack.id}"
-          class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer"
+        <a
+          href="pack.html?id=${pack.id}"
+          class="flex items-center justify-center border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer hover:bg-[var(--secondary-color)] hover:text-[var(--screen-bg)] hover:border-[var(--secondary-color)] transition-colors duration-200"
         >
           Know More
-        </button>
+        </a>
       </div>
     `).join('');
   }
