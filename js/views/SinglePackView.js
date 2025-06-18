@@ -3,6 +3,7 @@ import FileStorage from '/js/utilities/FileStorage.js';
 import FlightsModel from '/js/models/FlightsModel.js';
 import ReservationModel from '/js/models/ReservationModel.js';
 import LocalStorageCRUD from '/js/utilities/crud.js';
+import CategoryModel from '/js/models/CategoryModel.js';
 
 class SinglePackView {
   constructor() {
@@ -44,7 +45,7 @@ class SinglePackView {
     document.getElementById('packDescription').textContent = this.pack.description;
 
     await this.renderImageCarousel();
-    this.renderSimilarPacks();
+    await this.renderSimilarPacks();
   }
 
   async renderImageCarousel() {
@@ -61,30 +62,28 @@ class SinglePackView {
     return imageFile ? URL.createObjectURL(imageFile) : null;
   }
 
-  renderSimilarPacks() {
-    const similarPacksData = [
-      {
-        image: '/img/packs/3.png',
-        icons: ['cactus', 'tree'],
-        title: 'Pack Name',
-        date: '11 to 15 April',
-        price: '1760€'
-      },
-      {
-        image: '/img/packs/3.png',
-        icons: ['cactus', 'tree'],
-        title: 'Pack Name',
-        date: '11 to 15 April',
-        price: '1760€'
-      },
-      {
-        image: '/img/packs/3.png',
-        icons: ['cactus', 'tree'],
-        title: 'Pack Name',
-        date: '11 to 15 April',
-        price: '1760€'
+  async renderSimilarPacks() {
+    const similarPacks = PackModel.getByCategory(this.pack.categories[0]);
+    const similarPacksData = await Promise.all(similarPacks.map(async pack => {
+      if (typeof pack.featuredImage === 'string' && pack.featuredImage.length > 0) {
+        pack.featuredImage = await this.getImagePath(pack.featuredImage);
       }
-    ];
+      if (pack.categories.length > 0) {
+        const categories = pack.categories.map(category => CategoryModel.getByField('name', category));
+        pack.icons = categories.map(category => category.icon);
+        pack.icons = await Promise.all(pack.icons.map(async icon => this.getImagePath(icon)));
+      }
+
+      return {
+        image: pack.featuredImage,
+        icons: pack.icons,
+        title: pack.title,
+        date: this.formatDateRange(pack.startDate, pack.endDate),
+        price: pack.price
+      }
+    }));
+
+    console.log(similarPacksData);
 
     const packsContainer = document.getElementById('similarPacks');
     packsContainer.innerHTML = similarPacksData.map(pack => `
@@ -92,7 +91,7 @@ class SinglePackView {
                 style="background: url(${pack.image})">
                 <div class="flex items-center justify-center gap-3">
                     ${pack.icons.map(icon => `
-                        <img src="/img/icon/ic-${icon}.svg" alt="${icon} Icon" width="34" />
+                        <img src="${icon}" alt="${icon} Icon" width="34" />
                     `).join('')}
                 </div>
                 <div class="text-center my-28">
