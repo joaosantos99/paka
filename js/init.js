@@ -1,4 +1,5 @@
 import LocalStorageCRUD from '/js/utilities/crud.js';
+import { populate } from '/js/utilities/populate.js'
 
 const checkStorage = (key) => {
   const exists = LocalStorageCRUD.hasKey(key);
@@ -16,3 +17,6 @@ checkStorage('categories');
 checkStorage('flights');
 checkStorage('search');
 checkStorage('contacts');
+checkStorage('reservations');
+
+// populate();

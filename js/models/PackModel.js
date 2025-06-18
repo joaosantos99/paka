@@ -17,6 +17,11 @@ class PackModel extends BaseModel {
     endDate,
     featuredImage,
     images,
+    stops,
+    dificulty,
+    budgetRange,
+    continent,
+    slots,
   }) {
     const packs = LocalStorageCRUD.read(this.modelName);
     const index = LocalStorageCRUD.read(`${this.modelName}-index`);
@@ -32,6 +37,11 @@ class PackModel extends BaseModel {
       endDate,
       featuredImage,
       images,
+      stops,
+      dificulty,
+      budgetRange,
+      continent,
+      slots,
       deleted: false,
     }
 
