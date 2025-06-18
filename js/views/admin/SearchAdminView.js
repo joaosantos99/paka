@@ -29,9 +29,6 @@ class SearchAdminView {
         return `
             <div class="mt-8 flex items-center gap-5 justify-between">
                 <h4 class="text-3xl font-semibold">Dashboard</h4>
-                <button type="button" class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:hidden block">
-                    Add Entry
-                </button>
             </div>
 
             <div class="my-5 flex justify-between gap-5 items-center">
@@ -72,10 +69,6 @@ class SearchAdminView {
                         </a>
                     </li>
                 </ul>
-
-                <button type="button" class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:block hidden">
-                    Add Entry
-                </button>
             </div>
 
             <div class="w-full overflow-x-auto">
