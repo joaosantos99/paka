@@ -220,11 +220,143 @@ export const populate = () => {
       arrivalTime: "10:00",
       price: "100",
       deleted: false
+    },
+    {
+      id: 17,
+      departure: "Lucerne",
+      departureDate: "2025-07-07",
+      departureTime: "14:00",
+      arrival: "Zurich",
+      arrivalDate: "2025-07-07",
+      arrivalTime: "15:30",
+      price: "120",
+      deleted: false
+    },
+    {
+      id: 18,
+      departure: "Crete",
+      departureDate: "2025-08-22",
+      departureTime: "16:00",
+      arrival: "Athens",
+      arrivalDate: "2025-08-22",
+      arrivalTime: "17:30",
+      price: "150",
+      deleted: false
+    },
+    {
+      id: 19,
+      departure: "Fez",
+      departureDate: "2025-09-17",
+      departureTime: "10:00",
+      arrival: "Casablanca",
+      arrivalDate: "2025-09-17",
+      arrivalTime: "11:30",
+      price: "90",
+      deleted: false
+    },
+    {
+      id: 20,
+      departure: "Rio Negro",
+      departureDate: "2025-10-15",
+      departureTime: "13:00",
+      arrival: "Manaus",
+      arrivalDate: "2025-10-15",
+      arrivalTime: "14:30",
+      price: "180",
+      deleted: false
+    },
+    {
+      id: 21,
+      departure: "Everest Base Camp",
+      departureDate: "2025-11-14",
+      departureTime: "08:00",
+      arrival: "Kathmandu",
+      arrivalDate: "2025-11-14",
+      arrivalTime: "10:30",
+      price: "200",
+      deleted: false
+    },
+    {
+      id: 22,
+      departure: "Cuba",
+      departureDate: "2025-12-30",
+      departureTime: "15:00",
+      arrival: "Miami",
+      arrivalDate: "2025-12-30",
+      arrivalTime: "16:30",
+      price: "250",
+      deleted: false
+    },
+    {
+      id: 23,
+      departure: "Salar de Atacama",
+      departureDate: "2026-01-22",
+      departureTime: "11:00",
+      arrival: "Calama",
+      arrivalDate: "2026-01-22",
+      arrivalTime: "12:30",
+      price: "120",
+      deleted: false
+    },
+    {
+      id: 24,
+      departure: "Manuel Antonio",
+      departureDate: "2026-02-10",
+      departureTime: "14:00",
+      arrival: "San José",
+      arrivalDate: "2026-02-10",
+      arrivalTime: "15:30",
+      price: "100",
+      deleted: false
+    },
+    {
+      id: 25,
+      departure: "Lake Louise",
+      departureDate: "2026-03-22",
+      departureTime: "13:00",
+      arrival: "Calgary",
+      arrivalDate: "2026-03-22",
+      arrivalTime: "14:30",
+      price: "180",
+      deleted: false
+    },
+    {
+      id: 26,
+      departure: "Hamilton Island",
+      departureDate: "2026-04-10",
+      departureTime: "15:00",
+      arrival: "Sydney",
+      arrivalDate: "2026-04-10",
+      arrivalTime: "17:30",
+      price: "280",
+      deleted: false
+    },
+    {
+      id: 27,
+      departure: "El Calafate",
+      departureDate: "2026-05-15",
+      departureTime: "10:00",
+      arrival: "Santiago",
+      arrivalDate: "2026-05-15",
+      arrivalTime: "12:30",
+      price: "220",
+      deleted: false
+    },
+    {
+      id: 28,
+      departure: "Sahara Desert",
+      departureDate: "2026-06-12",
+      departureTime: "09:00",
+      arrival: "Marrakech",
+      arrivalDate: "2026-06-12",
+      arrivalTime: "10:30",
+      price: "110",
+      deleted: false
     }
   ];
 
   LocalStorageCRUD.update('flights', defaultFlights);
-  LocalStorageCRUD.update('flights-index', 16);
+  LocalStorageCRUD.update('flights-index', 28);
 
   const defaultPacks = [
     {
