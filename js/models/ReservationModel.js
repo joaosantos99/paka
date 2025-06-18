@@ -36,12 +36,12 @@ class ReservationModel extends BaseModel {
 
   getByUserId(userId) {
     const reservations = LocalStorageCRUD.read(this.modelName);
-    return reservations.filter(reservation => reservation.userId === userId);
+    return reservations.filter(reservation => reservation.userId === userId && !reservation.deleted);
   }
 
   getByPackId(packId) {
     const reservations = LocalStorageCRUD.read(this.modelName);
-    return reservations.filter(reservation => reservation.packId === packId);
+    return reservations.filter(reservation => reservation.packId === packId && !reservation.deleted);
   }
 }
 

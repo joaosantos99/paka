@@ -14,7 +14,7 @@ class BaseModel {
 
   delete(id) {
     const models = LocalStorageCRUD.read(this.modelName);
-    const model = models.find(m => m.id === id);
+    const model = models.find(m => m.id === parseInt(id));
     model.deleted = true;
     LocalStorageCRUD.update(this.modelName, models);
   }
@@ -28,8 +28,8 @@ class BaseModel {
   }
 
   getByPk(id) {
-    const model = LocalStorageCRUD.read(this.modelName).find(m => m.id === id);
-    if (model.deleted) {
+    const model = LocalStorageCRUD.read(this.modelName).find(m => m.id === parseInt(id));
+    if (model?.deleted) {
       return null;
     }
     return model;

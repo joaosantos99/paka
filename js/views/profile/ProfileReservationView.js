@@ -1,108 +1,114 @@
 import LocalStorageCRUD from '/js/utilities/crud.js';
 import UserModel from '/js/models/UserModel.js';
+import ReservationModel from '/js/models/ReservationModel.js';
+import PackModel from '/js/models/PackModel.js';
+import FlightsModel from '/js/models/FlightsModel.js';
+import FileStorage from '/js/utilities/fileStorage.js';
+import CategoryModel from '/js/models/CategoryModel.js';
 
 class ProfileReservationView {
   constructor() {
     const userId = LocalStorageCRUD.read('user');
     this.user = UserModel.getByPk(userId);
 
-    this.render();
-    this.setupEventListeners();
+    Promise.all([
+      this.render()
+    ]).then(() => {
+      this.setupEventListeners();
+    });
   }
 
-  render() {
+  async render() {
     document.getElementById('profileName').textContent = this.user.name;
     document.getElementById('profileEmail').textContent = this.user.email;
 
-    this.renderReservations();
+    await this.renderReservations();
   }
 
-  renderReservations() {
-    const reservations = [
-      {
-        image: '/img/profile-card-img.png',
-        icons: ['cactus', 'tree'],
-        title: 'Pack Name',
-        date: '11 to 15 April',
-        price: '1760€',
-        flights: {
-          departure: {
-            route: 'Porto - Rome',
-            price: '160€',
-            booked: true
-          },
-          return: {
-            route: 'Rome - Porto',
-            price: '160€',
-            booked: true
-          }
-        }
-      },
-      {
-        image: '/img/profile-card-img.png',
-        icons: ['cactus', 'tree'],
-        title: 'Pack Name',
-        date: '11 to 15 April',
-        price: '1760€',
-        flights: {
-          departure: {
-            route: 'Porto - Rome',
-            price: '160€',
-            booked: true
-          },
-          return: {
-            route: 'Returning',
-            booked: false
-          }
-        }
-      },
-      {
-        image: '/img/profile-card-img.png',
-        icons: ['cactus', 'tree'],
-        title: 'Pack Name',
-        date: '11 to 15 April',
-        price: '1760€',
-        flights: {
-          departure: {
-            route: 'Departure',
-            booked: false
-          },
-          return: {
-            route: 'Returning',
-            booked: false
-          }
-        }
+  async getImagePath(image) {
+    const imageFile = await FileStorage.getFile(image);
+    return imageFile ? URL.createObjectURL(imageFile) : null;
+  }
+
+  async renderReservations() {
+    const reservations = ReservationModel.getByUserId(this.user.id);
+    const cards = await Promise.all(reservations.map(async reservation => {
+      reservation.pack = PackModel.getByPk(reservation.packId);
+      if (reservation.departureFlightId) {
+        reservation.departureFlight = FlightsModel.getByPk(reservation.departureFlightId);
       }
-    ];
+      if (reservation.arrivalFlightId) {
+        reservation.arrivalFlight = FlightsModel.getByPk(reservation.arrivalFlightId);
+      }
+
+      return {
+        id: reservation.id,
+        image: await this.getImagePath(reservation.pack.featuredImage),
+        icons: await Promise.all(reservation.pack.categories.map(async category => {
+          const categoryModel = CategoryModel.getByField('name', category);
+          return await this.getImagePath(categoryModel.icon);
+        })),
+        title: reservation.pack.title,
+        date: reservation.pack.startDate,
+        price: reservation.pack.price,
+        departureFlight: {
+          arrival: reservation?.departureFlight?.arrival,
+          price: reservation?.departureFlight?.price,
+          booked: !!reservation?.departureFlight,
+        },
+        arrivalFlight: {
+          departure: reservation?.arrivalFlight?.departure,
+          price: reservation?.arrivalFlight?.price,
+          booked: !!reservation?.arrivalFlight,
+        },
+      };
+    }));
+
+    console.log(cards);
 
     const reservationsContainer = document.getElementById('reservationsGrid');
-    reservationsContainer.innerHTML = reservations.map(reservation => `
+    reservationsContainer.innerHTML = cards.map(card => `
             <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)]"
-                style="background: url(${reservation.image})">
+                style="background: url(${card.image})">
                 <div class="flex items-center justify-center gap-3">
-                    ${reservation.icons.map(icon => `
-                        <img src="/img/icon/ic-${icon}.svg" alt="${icon} Icon" />
+                    ${card.icons.map(icon => `
+                        <img src="${icon}" alt="${icon} Icon" />
                     `).join('')}
                 </div>
 
                 <div class="text-center my-16">
-                    <h4 class="text-3xl font-semibold text-center">${reservation.title}</h4>
-                    <p>${reservation.date} / ${reservation.price}</p>
+                    <h4 class="text-3xl font-semibold text-center">${card.title}</h4>
+                    <p>${card.date} / ${card.price}</p>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-3">
-                    <button type="button"
-                        class="${reservation.flights.departure.booked ? 'bg-[var(--secondary-color)]' : 'border border-[var(--screen-bg)]'} text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer text-nowrap">
-                        ${reservation.flights.departure.booked ? `${reservation.flights.departure.route} | ${reservation.flights.departure.price}` : reservation.flights.departure.route}
-                    </button>
+                    <div
+                        class="flex items-center justify-center ${card.departureFlight.booked ? 'bg-[var(--secondary-color)]' : 'border border-[var(--screen-bg)]'} text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full text-nowrap">
+                        <div class="flex items-center justify-center gap-2">
+                            ${card.departureFlight.booked ? `
+                                <p>${card.departureFlight.arrival}</p>
+                                <p>${card.departureFlight.price}€</p>
+                            ` : `
+                                <p>No flight booked</p>
+                            `}
+                        </div>
+                    </div>
+
+                    <div
+                        class="flex items-center justify-center ${card.arrivalFlight.booked ? 'bg-[var(--secondary-color)]' : 'border border-[var(--screen-bg)]'} text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full text-nowrap">
+                        <div class="flex items-center justify-center gap-2">
+                            ${card.arrivalFlight.booked ? `
+                                <p>${card.arrivalFlight.departure}</p>
+                                <p>${card.arrivalFlight.price}€</p>
+                            ` : `
+                                <p>No flight booked</p>
+                            `}
+                        </div>
+                    </div>
 
                     <button type="button"
-                        class="${reservation.flights.return.booked ? 'bg-[var(--secondary-color)]' : 'border border-[var(--screen-bg)]'} text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer text-nowrap">
-                        ${reservation.flights.return.booked ? `${reservation.flights.return.route} | ${reservation.flights.return.price}` : reservation.flights.return.route}
-                    </button>
-
-                    <button type="button"
-                        class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2">
+                        data-id="${card.id}"
+                        class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2 hover:bg-[var(--secondary-color)] hover:border-[var(--secondary-color)] transition-all duration-300">
                         Remove
                     </button>
                 </div>
@@ -128,9 +134,9 @@ class ProfileReservationView {
     // Implement tab content switching functionality here
   }
 
-  handleReservationAction(action, reservationId) {
-    console.log(`Reservation action: ${action}`, reservationId);
-    // Implement reservation action functionality here (book flight, remove reservation, etc.)
+  handleRemoveReservation(reservationId) {
+    ReservationModel.delete(reservationId);
+    this.renderReservations();
   }
 
   setupEventListeners() {
@@ -139,7 +145,10 @@ class ProfileReservationView {
       button.addEventListener('click', () => this.handleTabChange(button));
     });
 
-    // Add event listeners for reservation actions if needed
+    const removeButtons = document.querySelectorAll('[data-id]');
+    removeButtons.forEach(button => {
+      button.addEventListener('click', () => this.handleRemoveReservation(button.dataset.id));
+    });
   }
 }
 

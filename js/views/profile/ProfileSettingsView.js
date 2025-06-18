@@ -17,6 +17,11 @@ class ProfileSettingsView {
     this.fillForm();
   }
 
+  hydrateView() {
+    this.user = UserModel.getByPk(this.user.id);
+    this.render();
+  }
+
   fillForm() {
     document.getElementById('fname').value = this.user.name;
     document.getElementById('email').value = this.user.email;
@@ -25,12 +30,13 @@ class ProfileSettingsView {
   handleProfileUpdate(e) {
     e.preventDefault();
     const formData = {
-      fullName: document.getElementById('fname').value,
+      name: document.getElementById('fname').value,
       email: document.getElementById('email').value,
       password: document.getElementById('password').value
     };
-    console.log('Profile update data:', formData);
-    // Implement profile update functionality here
+
+    UserModel.update(this.user.id, formData);
+    this.hydrateView();
   }
 
   handleTabChange(button) {
