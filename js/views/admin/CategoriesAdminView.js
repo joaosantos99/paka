@@ -22,17 +22,14 @@ class CategoriesAdminView extends BaseAdminView {
   async getCategoryRows() {
     const categories = this.model.getAll();
 
-    categories.forEach(async category => {
+    await Promise.all(categories.map(async category => {
       if (category.featuredImage.length > 0) {
-        const featuredImage = await FileStorage.getFile(category.featuredImage);
-        category.featuredImage = featuredImage ? URL.createObjectURL(featuredImage) : null;
+        category.featuredImage = await this.getImagePath(category.featuredImage);
       }
       if (category.icon.length > 0) {
-        const icon = await FileStorage.getFile(category.icon);
-        category.icon = icon ? URL.createObjectURL(icon) : null;
+        category.icon = await this.getImagePath(category.icon);
       }
-      category.icon = icon ? URL.createObjectURL(icon) : null;
-    });
+    }));
 
     return categories.map((category, index) => `
         <tr id="category-${category.id}">
@@ -103,6 +100,11 @@ class CategoriesAdminView extends BaseAdminView {
       title: 'View Icon',
       message: `<img class="max-w-50 w-full h-full m-auto object-contain" src="${icon}" alt="Category Icon" />`,
     }).show();
+  }
+
+  async getImagePath(image) {
+    const imageFile = await FileStorage.getFile(image);
+    return imageFile ? URL.createObjectURL(imageFile) : null;
   }
 
   handleAddEntry() {

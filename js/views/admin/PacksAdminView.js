@@ -42,8 +42,6 @@ class PacksAdminView extends BaseAdminView {
       }
     }));
 
-    console.log(packs);
-
     return packs.map((pack, index) => `
             <tr id="pack-${pack.id}">
                 <td>
