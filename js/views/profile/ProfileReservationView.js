@@ -11,74 +11,8 @@ class ProfileReservationView {
   }
 
   render() {
-    const main = document.querySelector('main');
-    main.innerHTML = `
-            <!-- Profile Settings Section Start -->
-            <div class="relative overflow-x-hidden">
-                <section class="max-w-7xl px-4 mx-auto">
-                    <div class="mt-8 flex justify-between items-center flex-col">
-                        <div class="text-center">
-                            <img src="/img/user-profile.svg" alt="User Profile" class="mx-auto" />
-                            <h4 class="text-5xl font-semibold">${this.user.name}</h4>
-                            <h3 class="text-lg">${this.user.email}</h3>
-                        </div>
-
-                        <div class="p-4 rounded-xl bg-[var(--light-bg-color)] lg:flex hidden items-center gap-4 mt-10">
-                            <img src="/img/icon/ic-filled-globe.svg" alt="Filled Globe Img" />
-                            <img src="/img/icon/ic-empty-globe.svg" alt="Empty Globe Img" />
-                            <img src="/img/icon/ic-empty-globe.svg" alt="Empty Globe Img" />
-                            <img src="/img/icon/ic-empty-globe.svg" alt="Empty Globe Img" />
-                            <img src="/img/icon/ic-empty-globe.svg" alt="Empty Globe Img" />
-                            <img src="/img/icon/ic-empty-globe.svg" alt="Empty Globe Img" />
-                            <img src="/img/icon/ic-empty-globe.svg" alt="Empty Globe Img" />
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <div class="max-w-7xl px-4 mx-auto mb-20">
-                <ul class="sm:flex hidden gap-2 justify-center mt-16 mb-12 overflow-x-auto w-full">
-                    <li>
-                        <a href="/html/profile/settings.html">
-                            <button
-                              type="button"
-                              data-tab="settings"
-                              class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium rounded-s-md w-36"
-                            >
-                              Settings
-                            </button>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="/html/profile/reservation.html">
-                          <button
-                            type="button"
-                            data-tab="reservations"
-                            class="border border-[var(--secondary-color)] py-2 px-8 cursor-pointer bg-[var(--secondary-color)] text-white font-medium w-36"
-                          >
-                            Reservations
-                          </button>
-                        </a>
-                    </li>
-
-                    <li>
-                    <a href="/html/profile/badges.html">
-                        <button
-                        type="button" data-tab="badges"
-                            class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium rounded-e-md w-36">
-                                Badges
-                        </button>
-                    </a>
-                    </li>
-                </ul>
-
-                <div class="grid lg:grid-cols-3 sm:grid-cols-2 gap-6" id="reservationsGrid">
-                    <!-- Reservations will be dynamically inserted here -->
-                </div>
-            </div>
-            <!-- Profile Settings Section End -->
-        `;
+    document.getElementById('profileName').textContent = this.user.name;
+    document.getElementById('profileEmail').textContent = this.user.email;
 
     this.renderReservations();
   }

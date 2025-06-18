@@ -114,7 +114,6 @@ class SearchHandler {
       });
     }
 
-    console.log(packs);
     return packs;
   }
 }

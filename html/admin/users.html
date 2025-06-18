@@ -1,25 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <!-- Favicon Icon -->
-      <link rel="icon" href="../../img/favicon.svg" />
-      <!-- Custom CSS File -->
-      <link rel="stylesheet" href="../../css/style.css" />
-      <!-- Tailwind CSS CDN File -->
-      <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-      <title>PAKA - Admin Users</title>
-   </head>
-   <body>
-      <!-- Main Section Start -->
-      <main class="max-w-7xl px-4 mx-auto"></main>
-      <!-- Main Section End -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Favicon Icon -->
+    <link rel="icon" href="../../img/favicon.svg" />
+    <!-- Custom CSS File -->
+    <link rel="stylesheet" href="../../css/style.css" />
+    <!-- Tailwind CSS CDN File -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>PAKA - Admin Users</title>
+  </head>
+  <body>
+    <!-- Main Section Start -->
+    <main class="max-w-7xl px-4 mx-auto">
+      <div class="mt-8 flex items-center gap-5 justify-between">
+        <h4 class="text-3xl font-semibold">Dashboard</h4>
+        <button
+          id="addEntryButton"
+          type="button"
+          class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:hidden block"
+        >
+          Add Entry
+        </button>
+      </div>
 
-      <!-- Custom JavaScript File -->
-      <script src="/js/init.js" type="module"></script>
-      <script src="/js/views/HeaderView.js" type="module"></script>
-      <script src="/js/views/admin/UsersAdminView.js" type="module"></script>
-      <script src="/js/views/FooterView.js" type="module"></script>
-   </body>
+      <div class="my-5 flex justify-between gap-5 items-center">
+        <ul class="flex gap-2 overflow-x-auto">
+          <li>
+            <a href="packs.html">
+              <button
+                type="button"
+                class="border border-[var(--primary-color)] rounded-md rounded-e-none py-2 px-8 cursor-pointer font-medium w-36"
+              >
+                Packs
+              </button>
+            </a>
+          </li>
+          <li>
+            <a href="categories.html">
+              <button
+                type="button"
+                class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium w-36"
+              >
+                Categories
+              </button>
+            </a>
+          </li>
+          <li>
+            <a href="flights.html">
+              <button
+                type="button"
+                class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium w-36"
+              >
+                Flights
+              </button>
+            </a>
+          </li>
+          <li>
+            <a href="users.html">
+              <button
+                type="button"
+                class="border border-[var(--secondary-color)] py-2 px-8 cursor-pointer bg-[var(--secondary-color)] text-white font-medium w-36"
+              >
+                Users
+              </button>
+            </a>
+          </li>
+          <li>
+            <a href="search.html">
+              <button
+                type="button"
+                class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium rounded-e-md w-36"
+              >
+                Search
+              </button>
+            </a>
+          </li>
+        </ul>
+
+        <button
+          id="addEntryButton"
+          type="button"
+          class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:block hidden"
+        >
+          Add Entry
+        </button>
+      </div>
+
+      <div class="w-full overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-[var(--screen-bg)]">
+              <th scope="col">
+                <div
+                  class="text-left bg-black px-4 py-5 border border-black rounded-tl-md text-nowrap"
+                >
+                  Name
+                </div>
+              </th>
+              <th scope="col">
+                <div
+                  class="text-left bg-black px-4 py-5 border border-black text-nowrap"
+                >
+                  Email
+                </div>
+              </th>
+              <th scope="col">
+                <div
+                  class="text-left bg-black px-4 py-5 border border-black text-nowrap"
+                >
+                  Favourites Count
+                </div>
+              </th>
+              <th scope="col">
+                <div
+                  class="bg-black text-left px-4 py-5 border border-black text-nowrap"
+                >
+                  Type
+                </div>
+              </th>
+              <th scope="col">
+                <div
+                  class="bg-black text-left px-4 py-5 border border-black text-nowrap"
+                >
+                  Last Access
+                </div>
+              </th>
+              <th scope="col">
+                <div
+                  class="bg-black text-left px-4 py-5 border border-black rounded-tr-md text-black"
+                >
+                  Action
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
+    <!-- Main Section End -->
+
+    <!-- Custom JavaScript File -->
+    <script src="/js/init.js" type="module"></script>
+    <script src="/js/views/HeaderView.js" type="module"></script>
+    <script src="/js/views/admin/UsersAdminView.js" type="module"></script>
+    <script src="/js/views/FooterView.js" type="module"></script>
+  </body>
 </html>
