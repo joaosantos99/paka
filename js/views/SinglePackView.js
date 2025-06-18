@@ -1,4 +1,3 @@
-import HeaderView from '/js/views/HeaderView.js';
 import PackModel from '/js/models/PackModel.js';
 import FileStorage from '/js/utilities/FileStorage.js';
 import FlightsModel from '/js/models/FlightsModel.js';
@@ -26,103 +25,26 @@ class SinglePackView {
 
     const reservations = this.reservationModel.getByPackId(this.packId);
     this.isAlreadyReserved = reservations.filter(reservation => reservation.userId === this.userId).length > 0;
-    console.log(this.isAlreadyReserved);
 
     this.pack = PackModel.getByPk(parseInt(this.packId));
 
-    Promise.all([this.render()])
-      .then(() => {
-        this.setupEventListeners();
-      });
+    Promise.all([
+      this.render()
+    ]).then(() => {
+      this.setupEventListeners();
+    });
   }
 
   async render() {
-    const main = document.querySelector('main');
-    main.innerHTML = `
-            <!-- Header + Search Section Start -->
-            <div class="sm:min-h-[750px] !bg-no-repeat !bg-cover !bg-center" style="background: url(${await this.getImagePath(this.pack.featuredImage)})">
-                <div id="lightHeaderContainer"></div>
-                <div class="sm:my-50 mt-20 px-4">
-                    <img src="/img/icon/ic-cactus.svg" alt="Cactus Img" width="82" class="mx-auto" />
-                    <h1 class="md:text-6xl sm:text-5xl text-4xl max-w-2xl mx-auto text-center uppercase font-semibold text-[var(--screen-bg)] mt-3">
-                        ${this.pack.name}
-                    </h1>
-                    <div
-                        class="flex items-center justify-center bg-[var(--primary-color)] text-white rounded-md h-11 px-6 mt-3 sm:w-fit w-full mx-auto block font-medium">
-                        ${this.formatDateRange(this.pack.startDate, this.pack.endDate)} | ${this.pack.price}€
-                    </div>
-                </div>
-
-                <!-- Search Filter Section Start -->
-                <section class="relative z-999 sm:translate-y-0 bg-[var(--light-bg-color)]">
-                    <div class="max-w-7xl px-4 mx-auto p-4 rounded-md">
-                        <form id="reservationForm">
-                            <div class="grid sm:grid-cols-4 md:gap-6 gap-2">
-                                <input type="text" name="departure" id="departure"
-                                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                                    placeholder="Departure"
-                                />
-                                <div class="relative">
-                                  <input type="text" name="arrival" id="arrival"
-                                      class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                                      placeholder="Arrival"
-                                  />
-                                </div>
-                                <input type="number" name="numberOfPeople" id="numberOfPeople"
-                                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                                    placeholder="1 Person" />
-                                <button type="submit"
-                                    class="bg-[var(--secondary-color)] text-white rounded-md h-12 px-10 w-full cursor-pointer hover:bg-transparent hover:text-[var(--secondary-color)] hover:border-2 hover:border-[var(--secondary-color)] transition-colors duration-200 ${this.isAlreadyReserved ? 'opacity-50 cursor-not-allowed bg-[var(--secondary-color)]' : ''} "
-                                    disabled=${this.isAlreadyReserved ? 'true' : 'false'}
-                                    >
-                                    Add Reservations
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </section>
-                <!-- Search Filter Section End -->
-            </div>
-            <!-- Header + Search Section End -->
-
-            <!-- Adventure Section Start -->
-            <div class="relative">
-                <section class="max-w-7xl px-4 mx-auto lg:pt-24 sm:pt-14 pt-52 md:pb-24 pb-14 grid md:grid-cols-2 items-center gap-5">
-                    <h3 class="md:text-5xl text-4xl font-semibold md:mb-4 md:leading-14 md:w-9/12 z-10 relative text-[var(--secondary-color)]">
-                        ${this.pack.title}
-                    </h3>
-                    <p class="text-base">
-                        ${this.pack.description}
-                    </p>
-                </section>
-            </div>
-            <!-- Adventure Section End -->
-
-            <!-- Image Carousel Section Start -->
-            <section class="bg-[var(--light-bg-color)] py-12 relative overflow-x-hidden">
-                <div class="max-w-7xl px-4 mx-auto flex sm:gap-6 gap-4" id="imageCarousel">
-                    <!-- Images will be dynamically inserted here -->
-                </div>
-            </section>
-            <!-- Image Carousel Section End -->
-
-            <!-- Similar Packs Section Start -->
-            <section class="py-12 overflow-x-hidden">
-                <div class="max-w-7xl px-4 mx-auto flex md:items-center gap-6 md:flex-row flex-col">
-                    <h4 class="md:text-4xl text-3xl font-semibold min-w-xs">
-                        You may <span class="md:block hidden"></span> also Like!
-                    </h4>
-                    <div id="similarPacks" class="flex gap-6 overflow-x-auto">
-                        <!-- Similar packs will be dynamically inserted here -->
-                    </div>
-                </div>
-            </section>
-            <!-- Similar Packs Section End -->
-        `;
+    document.getElementById('packName').textContent = this.pack.name;
+    document.getElementById('packHero').style.backgroundImage = `url(${await this.getImagePath(this.pack.featuredImage)})`;
+    document.getElementById('packPriceAndDate').textContent = `${this.formatDateRange(this.pack.startDate, this.pack.endDate)} | ${this.pack.price}€`;
+    document.getElementById('addReservationButton').disabled = this.isAlreadyReserved;
+    document.getElementById('packTitle').textContent = this.pack.title;
+    document.getElementById('packDescription').textContent = this.pack.description;
 
     await this.renderImageCarousel();
     this.renderSimilarPacks();
-    new HeaderView();
   }
 
   async renderImageCarousel() {

@@ -1,5 +1,4 @@
 import CategoryModel from '/js/models/CategoryModel.js';
-import HeaderModel from '/js/views/HeaderView.js';
 import FileStorage from '/js/utilities/fileStorage.js';
 import SearchHandler from '/js/utilities/searchHandler.js';
 import FlightsModel from '/js/models/FlightsModel.js';
@@ -30,147 +29,38 @@ class WaterPacksView {
   }
 
   async render() {
-    const main = document.querySelector('main');
-    main.innerHTML = `
-            <!-- Header + Search Section Start -->
-            <div class="sm:min-h-96 !bg-no-repeat !bg-cover !bg-center" style="background: url(${await this.getImagePath(this.category.featuredImage)})">
-                <div id="lightHeaderContainer"></div>
-                <div class="text-[var(--screen-bg)] text-center sm:my-16 mt-16">
-                    <img src="${await this.getImagePath(this.category.icon)}" alt="Category icon" width="82" class="mx-auto mb-4" />
-                    <h1 class="font-semibold text-4xl">${this.category.name}</h1>
-                </div>
+    document.getElementById('categoryName').textContent = this.category.name;
+    document.getElementById('categoryHero').style.backgroundImage = `url(${await this.getImagePath(this.category.featuredImage)})`;
+    document.getElementById('categoryIcon').src = await this.getImagePath(this.category.icon);
+    document.getElementById('categoryIconBottom').src = await this.getImagePath(this.category.icon);
 
-                <!-- Search Filter Section Start -->
-                <section class="max-w-7xl px-4 mx-auto sm:translate-y-10 translate-y-40 relative z-999">
-                    <div class="bg-[var(--light-bg-color)] p-4 rounded-md">
-                        <form class="grid sm:grid-cols-12 md:gap-6 gap-2" id="searchForm">
-                            <div class="sm:col-span-10">
-                                <div class="grid sm:grid-cols-4 md:gap-6 gap-2">
-                                    <input type="text" name="departure" id="departure"
-                                        class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                                        placeholder="Departure"
-                                        value="${this.queryParams.departure || ''}"
-                                    />
-                                    <div class="border rounded-md h-12 bg-[var(--screen-bg)] flex items-center justify-between">
-                                        <div class="w-1/2">
-                                            <input type="date" name="departingDate" id="departingDate"
-                                                class="h-full p-3.5 focus-within:outline-0 text-sm w-full bg-transparent border-0"
-                                                placeholder="Start Date"
-                                                value="${this.queryParams.departingDate || ''}"
-                                            />
-                                        </div>
-                                        <div class="h-8 w-[1px] bg-gray-500"></div>
-                                        <div class="w-1/2">
-                                            <input type="date" name="returningDate" id="returningDate"
-                                                class="h-full p-3.5 focus-within:outline-0 text-sm w-full bg-transparent border-0"
-                                                placeholder="End Date"
-                                                value="${this.queryParams.returningDate || ''}"
-                                            />
-                                        </div>
-                                    </div>
-                                    <input type="number" name="numberOfPeople" id="numberOfPeople"
-                                        class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                                        placeholder="1 Person"
-                                        value="${this.queryParams.numberOfPeople || ''}"
-                                    />
-                                    <select name="category" id="category"
-                                        class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]">
-                                        <option value="all">All Categories</option>
-                                        ${CategoryModel.getAll().map(category => `
-                                            <option
-                                              ${this.categoryKey === category.name ? 'selected' : ''}
-                                              value="${category.name}"
-                                            >
-                                              ${category.name}
-                                            </option>
-                                        `).join('')}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <button type="submit"
-                                    class="bg-[var(--secondary-color)] text-white rounded-md h-12 px-2.5 w-full cursor-pointer">
-                                    Search
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </section>
-                <!-- Search Filter Section End -->
-            </div>
-            <!-- Header + Search Section End -->
-
-            <!-- Filter + Cards Section Start -->
-            <section class="relative">
-                <div class="max-w-7xl px-4 mx-auto sm:py-20 pt-52 pb-20">
-                    <div class="grid md:grid-cols-12 gap-6 items-start">
-                        <!-- Filter Section -->
-                        <div class="lg:col-span-3 md:col-span-4 p-4 rounded-md bg-[var(--light-bg-color)] md:block hidden">
-                            <h6 class="text-lg font-semibold">Filter by:</h6>
-                            <div class="mt-3">
-                                <label for="stops" class="font-medium cursor-pointer">Stops</label>
-                                <input type="text" name="stops" id="stops"
-                                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)] mt-1.5"
-                                    placeholder="0"
-                                    value="${this.queryParams.stops || ''}"
-                                />
-                            </div>
-                            <div class="mt-3">
-                                <label for="min" class="font-medium cursor-pointer">Budget</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="text" name="min" id="min"
-                                        class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)] mt-1.5"
-                                        placeholder="0"
-                                        value="${this.queryParams.min || ''}"
-                                    />
-                                    <span>-</span>
-                                    <input type="text" name="max" id="max"
-                                        class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)] mt-1.5"
-                                        placeholder="10000+"
-                                        value="${this.queryParams.max || ''}"
-                                    />
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <label for="continent" class="font-medium cursor-pointer">Continent</label>
-                                <select name="continent" id="continent"
-                                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)] mt-1.5">
-                                    <option value="all">All</option>
-                                    <option value="Europe" ${this.queryParams.continent === 'Europe' ? 'selected' : ''}>Europe</option>
-                                    <option value="Asia" ${this.queryParams.continent === 'Asia' ? 'selected' : ''}>Asia</option>
-                                    <option value="North America" ${this.queryParams.continent === 'North America' ? 'selected' : ''}>North America</option>
-                                    <option value="South America" ${this.queryParams.continent === 'South America' ? 'selected' : ''}>South America</option>
-                                    <option value="Africa" ${this.queryParams.continent === 'Africa' ? 'selected' : ''}>Africa</option>
-                                    <option value="Oceania" ${this.queryParams.continent === 'Oceania' ? 'selected' : ''}>Oceania</option>
-                                    <option value="Antarctica" ${this.queryParams.continent === 'Antarctica' ? 'selected' : ''}>Antarctica</option>
-                                </select>
-                            </div>
-                            <div class="mt-3">
-                                <label for="difficulty" class="font-medium cursor-pointer">Difficulty</label>
-                                <select name="difficulty" id="difficulty"
-                                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)] mt-1.5">
-                                    <option value="all">All</option>
-                                    <option value="easy" ${this.queryParams.difficulty === 'easy' ? 'selected' : ''}>Easy</option>
-                                    <option value="medium" ${this.queryParams.difficulty === 'medium' ? 'selected' : ''}>Medium</option>
-                                    <option value="hard" ${this.queryParams.difficulty === 'hard' ? 'selected' : ''}>Hard</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Cards Section -->
-                        <div class="lg:col-span-9 md:col-span-8">
-                            <div class="grid lg:grid-cols-3 sm:grid-cols-2 gap-6" id="packCards">
-                                <!-- Pack cards will be dynamically inserted here -->
-                            </div>
-                        </div>
-                    </div>
-                    <img src="${await this.getImagePath(this.category.icon)}" alt="Category icon" class="absolute bottom-0 left-0 -z-10 contrast-80 w-100" />
-                </div>
-            </section>
-            <!-- Filter + Cards Section End -->
-        `;
-    new HeaderModel();
+    this.renderForm();
     await this.renderPackCards();
+  }
+
+  renderForm() {
+    document.getElementById('category').innerHTML = [{ name: 'All' }, ...CategoryModel.getAll()].map(category => `
+      <option value="${category.name}">${category.name}</option>
+    `).join('');
+
+    this.fillForm();
+    this.fillFormFields();
+  }
+
+  fillForm() {
+    document.getElementById('departure').value = this.queryParams.departure || '';
+    document.getElementById('departingDate').value = this.queryParams.departingDate || '';
+    document.getElementById('returningDate').value = this.queryParams.returningDate || '';
+    document.getElementById('numberOfPeople').value = this.queryParams.numberOfPeople || '';
+    document.getElementById('category').value = this.categoryKey || '';
+  }
+
+  fillFormFields() {
+    document.getElementById('stops').value = this.queryParams.stops || '';
+    document.getElementById('min').value = this.queryParams.min || '';
+    document.getElementById('max').value = this.queryParams.max || '';
+    document.getElementById('continent').value = this.queryParams.continent || 'all';
+    document.getElementById('difficulty').value = this.queryParams.difficulty || 'all';
   }
 
   async getImagePath(image) {

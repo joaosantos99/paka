@@ -16,111 +16,8 @@ class PacksAdminView extends BaseAdminView {
     });
   }
 
-  async getTemplate() {
-    return `
-      <div class="mt-8 flex items-center gap-5 justify-between">
-        <h4 class="text-3xl font-semibold">Dashboard</h4>
-        <button id="addEntryButton" type="button" class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:hidden block">
-          Add Entry
-        </button>
-      </div>
-
-      <div class="my-5 flex justify-between gap-5 items-center">
-        <ul class="flex gap-2 overflow-x-auto">
-          <li>
-            <a href="packs.html">
-              <button type="button" class="border border-[var(--secondary-color)] py-2 px-8 rounded-md rounded-e-none cursor-pointer bg-[var(--secondary-color)] text-white font-medium w-36">
-                Packs
-              </button>
-            </a>
-          </li>
-          <li>
-            <a href="categories.html">
-              <button type="button" class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium w-36">
-                Categories
-              </button>
-            </a>
-          </li>
-          <li>
-              <a href="flights.html">
-                  <button type="button" class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium w-36">
-                      Flights
-                  </button>
-              </a>
-          </li>
-          <li>
-              <a href="users.html">
-                  <button type="button" class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium w-36">
-                      Users
-                  </button>
-              </a>
-          </li>
-          <li>
-              <a href="search.html">
-                  <button type="button" class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium rounded-e-md w-36">
-                      Search
-                  </button>
-              </a>
-          </li>
-        </ul>
-
-                <button id="addEntryButton" type="button" class="border border-[var(--primary-color)] py-2 px-8 rounded-md cursor-pointer lg:block hidden">
-                    Add Entry
-                </button>
-            </div>
-
-            <div class="w-full overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="text-[var(--screen-bg)]">
-                            <th scope="col">
-                                <div class="text-left bg-black px-4 py-5 border border-black rounded-tl-md">
-                                    Name
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div class="text-left bg-black px-4 py-5 border border-black">
-                                    Price
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div class="text-left bg-black px-4 py-5 border border-black">
-                                    Categories
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div class="text-left bg-black px-4 py-5 border border-black">
-                                    Description
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div class="text-left bg-black px-4 py-5 border border-black">
-                                    Date
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div class="bg-black text-left px-4 py-5 border border-black">
-                                    Featured Image
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div class="bg-black text-left px-4 py-5 border border-black">
-                                    Images
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div class="bg-black text-left px-4 py-5 border border-black rounded-tr-md text-black">
-                                    Action
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${await this.getPackRows()}
-                    </tbody>
-                </table>
-            </div>
-        `;
+  async renderView() {
+    document.querySelector('tbody').innerHTML = await this.getPackRows();
   }
 
   async getPackRows() {
@@ -134,10 +31,8 @@ class PacksAdminView extends BaseAdminView {
         pack.featuredImage = null;
       }
 
-      console.log(pack.images);
       if (pack.images.length > 0) {
         const images = await Promise.all(pack.images.map(async (image) => {
-          console.log(image);
           const imageFile = await FileStorage.getFile(image);
           return imageFile ? URL.createObjectURL(imageFile) : null;
         }));
