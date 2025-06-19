@@ -23,11 +23,57 @@ class ProfileReservationView {
     document.getElementById('profileEmail').textContent = this.user.email;
 
     await this.renderReservations();
+    this.renderBadges();
   }
 
   async getImagePath(image) {
     const imageFile = await FileStorage.getFile(image);
     return imageFile ? URL.createObjectURL(imageFile) : null;
+  }
+
+  renderBadges() {
+    const reservations = ReservationModel.getByUserId(this.user.id);
+    const reservationsWithPacks = reservations.map(reservation => {
+      const pack = PackModel.getByPk(reservation.packId);
+      return {
+        ...reservation,
+        pack
+      };
+    });
+
+    const continents = reservationsWithPacks.map(reservation => reservation.pack.continent);
+    const categories = reservationsWithPacks.map(reservation => reservation.pack.categories);
+
+    const uniqueContinents = [...new Set(continents)];
+    const uniqueCategories = [...new Set(categories.flat())];
+
+    const badges = [
+      {
+        achieved: reservations.length > 0,
+      },
+      {
+        achieved: uniqueContinents.length >= 4,
+      },
+      {
+        achieved: uniqueCategories.length >= 4,
+      },
+      {
+        achieved: reservations.length >= 10,
+      },
+    ];
+
+    const badgesIcons = document.getElementById('badgesIcons');
+    badgesIcons.innerHTML = badges.map(badge => {
+      if (badge.achieved) {
+        return `
+          <img src="/img/icon/ic-filled-globe.svg" alt="Filled Globe" />
+        `;
+      } else {
+        return `
+          <img src="/img/icon/ic-empty-globe.svg" alt="Empty Globe" />
+        `;
+      }
+    }).join('');
   }
 
   async renderReservations() {
@@ -63,8 +109,6 @@ class ProfileReservationView {
         },
       };
     }));
-
-    console.log(cards);
 
     const reservationsContainer = document.getElementById('reservationsGrid');
     reservationsContainer.innerHTML = cards.map(card => `
