@@ -11,6 +11,18 @@ const checkStorage = (key) => {
   }
 };
 
+const areAllStorageEmpty = () => {
+  const storageKeys = ['users', 'packs', 'categories', 'flights', 'search', 'contacts', 'reservations'];
+
+  for (const key of storageKeys) {
+    const data = LocalStorageCRUD.read(key);
+    if (data && data.length > 0) {
+      return false; // Found non-empty storage
+    }
+  }
+  return true; // All storage items are empty
+};
+
 checkStorage('users');
 checkStorage('packs');
 checkStorage('categories');
@@ -19,4 +31,7 @@ checkStorage('search');
 checkStorage('contacts');
 checkStorage('reservations');
 
-// populate();
+// Only populate if all storage items are empty
+if (areAllStorageEmpty()) {
+  populate();
+}

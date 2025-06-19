@@ -94,12 +94,12 @@ export default class HeaderModel {
 
         <!-- User icon for desktop, toggle icon for mobile -->
         <div class="flex items-center gap-6">
-          ${this.user.isAdmin ? `
+          ${this?.user?.isAdmin ? `
             <a class="text-sm bg-[var(--secondary-color)] text-white rounded-md px-4 py-2 sm:block hidden" href="/html/admin/packs.html">
               Admin Dashboard
             </a>
           ` : ''}
-          <a href="${this.user.id ? '/html/profile/settings.html' : '/html/login.html'}">
+          <a href="${this?.user?.id ? '/html/profile/settings.html' : '/html/login.html'}">
             <img
               ${this.lightHeaderContainer ? 'src="/img/icon/ic-user-light.svg"' : 'src="/img/icon/ic-user.svg"'}
               alt="User Icon"
@@ -140,18 +140,18 @@ export default class HeaderModel {
 
           <!-- Mobile Menu Footer -->
           <div class="p-6 border-t border-gray-200">
-            ${this.user.isAdmin ? `
+            ${this?.user?.isAdmin ? `
               <a class="block w-full text-center text-sm bg-[var(--secondary-color)] text-white rounded-md px-4 py-3 mb-4" href="/html/admin/packs.html">
                 Admin Dashboard
               </a>
             ` : ''}
-            <a href="${this.user.id ? '/html/profile/settings.html' : '/html/login.html'}" class="flex items-center gap-3 text-sm text-[var(--off-black)] hover:text-[var(--secondary-color)] transition-colors">
+            <a href="${this?.user?.id ? '/html/profile/settings.html' : '/html/login.html'}" class="flex items-center gap-3 text-sm text-[var(--off-black)] hover:text-[var(--secondary-color)] transition-colors">
               <img
                 src="/img/icon/ic-user.svg"
                 alt="User Icon"
                 class="w-5 h-5"
               />
-              <span>${this.user.id ? 'Profile Settings' : 'Login'}</span>
+              <span>${this?.user?.id ? 'Profile Settings' : 'Login'}</span>
             </a>
           </div>
         </div>
