@@ -1,16 +1,21 @@
 import PackModel from '/js/models/PackModel.js';
-import FileStorage from '/js/utilities/FileStorage.js';
 import FlightsModel from '/js/models/FlightsModel.js';
 import ReservationModel from '/js/models/ReservationModel.js';
 import LocalStorageCRUD from '/js/utilities/crud.js';
 import CategoryModel from '/js/models/CategoryModel.js';
+import BaseView from '/js/views/BaseView.js';
 
-class SinglePackView {
+class SinglePackView extends BaseView {
   constructor() {
+    super();
+
+    // Models
     this.flightsModel = FlightsModel;
     this.reservationModel = ReservationModel;
     this.packId = null;
     this.pack = null;
+
+    // Data
     this.userId = LocalStorageCRUD.read('user');
     this.isAlreadyReserved = false;
 
@@ -29,6 +34,7 @@ class SinglePackView {
 
     this.pack = PackModel.getByPk(parseInt(this.packId));
 
+    // Render
     Promise.all([
       this.render()
     ]).then(() => {
@@ -55,11 +61,6 @@ class SinglePackView {
     carouselContainer.innerHTML = images.map(image => `
             <img src="${image}" alt="Pack Image" class="md:w-2/5 sm:w-3/5 w-4/5" />
         `).join('');
-  }
-
-  async getImagePath(image) {
-    const imageFile = await FileStorage.getFile(image);
-    return imageFile ? URL.createObjectURL(imageFile) : null;
   }
 
   async renderSimilarPacks() {

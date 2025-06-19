@@ -1,17 +1,22 @@
-import FileStorage from '/js/utilities/fileStorage.js';
+import BaseView from '/js/views/BaseView.js';
 import FlightsModel from '/js/models/FlightsModel.js';
 import CategoryModel from '/js/models/CategoryModel.js';
 import PackModel from '/js/models/PackModel.js';
 
-export default class HomeView {
+export default class HomeView extends BaseView {
   constructor() {
+    super();
+
+    // Models
     this.flightsModel = FlightsModel;
     this.categoryModel = CategoryModel;
     this.packModel = PackModel;
 
+    // Data
     this.categories = this.categoryModel.getAll();
     this.activeCategory = this.categories[0].name;
 
+    // Render
     Promise.all([
       this.render(),
     ]).then(() => {
@@ -36,14 +41,6 @@ export default class HomeView {
     if (featuredPacksSection) {
       featuredPacksSection.innerHTML = await this.getFeaturedPacksSection();
     }
-  }
-
-  hydrateView() {
-    Promise.all([
-      this.render(),
-    ]).then(() => {
-      this.addEventListeners();
-    });
   }
 
   async getFeaturedCategoriesSection() {
@@ -150,11 +147,6 @@ export default class HomeView {
         </a>
       </div>
     `;
-  }
-
-  async getImagePath(image) {
-    const imageFile = await FileStorage.getFile(image);
-    return imageFile ? URL.createObjectURL(imageFile) : null;
   }
 
   handleDepartureInput(e) {

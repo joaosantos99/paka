@@ -1,3 +1,4 @@
+import FileStorage from '/js/utilities/fileStorage.js';
 class BaseView {
   async renderView() {
     const container = document.querySelector('main');
@@ -16,6 +17,11 @@ class BaseView {
 
   getTemplate() {
     throw new Error('Method not implemented');
+  }
+
+  async getImagePath(image) {
+    const imageFile = await FileStorage.getFile(image);
+    return imageFile ? URL.createObjectURL(imageFile) : null;
   }
 }
 
