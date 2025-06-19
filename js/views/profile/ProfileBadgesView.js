@@ -1,5 +1,7 @@
 import LocalStorageCRUD from '/js/utilities/crud.js';
 import UserModel from '/js/models/UserModel.js';
+import ReservationModel from '/js/models/ReservationModel.js';
+import PackModel from '/js/models/PackModel.js';
 
 class ProfileBadgesView {
   constructor() {
@@ -18,32 +20,60 @@ class ProfileBadgesView {
   }
 
   renderBadges() {
+    const reservations = ReservationModel.getByUserId(this.user.id);
+    const reservationsWithPacks = reservations.map(reservation => {
+      const pack = PackModel.getByPk(reservation.packId);
+      return {
+        ...reservation,
+        pack
+      };
+    });
+
+    const continents = reservationsWithPacks.map(reservation => reservation.pack.continent);
+    const categories = reservationsWithPacks.map(reservation => reservation.pack.categories);
+
+    const uniqueContinents = [...new Set(continents)];
+    const uniqueCategories = [...new Set(categories.flat())];
+
     const badges = [
       {
-        achieved: true,
-        title: 'World Traveler',
-        description: 'Travel to 5 different continents in 1 year',
+        achieved: reservations.length > 0,
+        title: 'First Timer',
+        description: 'Reserve your first pack',
         reward: '5% discount'
       },
       {
-        achieved: false,
+        achieved: uniqueContinents.length >= 4,
         title: 'World Traveler',
-        description: 'Travel to 5 different continents in 1 year',
+        description: 'Reserve 4 packs to 4 different continents',
         reward: '5% discount'
       },
       {
-        achieved: false,
-        title: 'World Traveler',
-        description: 'Travel to 5 different continents in 1 year',
+        achieved: uniqueCategories.length >= 4,
+        title: 'Jack of All Trades',
+        description: 'Reserve 4 packs to 4 different categories',
         reward: '5% discount'
       },
       {
-        achieved: false,
-        title: 'World Traveler',
-        description: 'Travel to 5 different continents in 1 year',
+        achieved: reservations.length >= 10,
+        title: 'Travel Enthusiast',
+        description: 'Reserve 10 packs',
         reward: '5% discount'
-      }
+      },
     ];
+
+    const badgesIcons = document.getElementById('badgesIcons');
+    badgesIcons.innerHTML = badges.map(badge => {
+      if (badge.achieved) {
+        return `
+          <img src="/img/icon/ic-filled-globe.svg" alt="Filled Globe" />
+        `;
+      } else {
+        return `
+          <img src="/img/icon/ic-empty-globe.svg" alt="Empty Globe" />
+        `;
+      }
+    }).join('');
 
     const badgesContainer = document.getElementById('badgesGrid');
     badgesContainer.innerHTML = badges.map(badge => `
