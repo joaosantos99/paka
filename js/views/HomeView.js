@@ -258,6 +258,14 @@ export default class HomeView extends BaseView {
     this.activeCategory = e.target.textContent.trim();
     this.hydrateView();
   }
+
+  hydrateView() {
+    Promise.all([
+      this.render(),
+    ]).then(() => {
+      this.addEventListeners();
+    });
+  }
 }
 
 new HomeView();

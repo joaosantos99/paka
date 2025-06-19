@@ -70,6 +70,12 @@ class ProfileSettingsView {
     tabButtons.forEach(button => {
       button.addEventListener('click', () => this.handleTabChange(button));
     });
+
+    const logoutButton = document.getElementById('logoutButton');
+    logoutButton.addEventListener('click', () => {
+      LocalStorageCRUD.delete('user');
+      window.location.href = '/html/login.html';
+    });
   }
 
   renderBadges() {

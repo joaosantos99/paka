@@ -192,6 +192,12 @@ class ProfileReservationView extends BaseView {
     removeButtons.forEach(button => {
       button.addEventListener('click', () => this.handleRemoveReservation(button.dataset.id));
     });
+
+    const logoutButton = document.getElementById('logoutButton');
+    logoutButton.addEventListener('click', () => {
+      LocalStorageCRUD.delete('user');
+      window.location.href = '/html/login.html';
+    });
   }
 }
 
