@@ -1,15 +1,19 @@
 import CategoryModel from '/js/models/CategoryModel.js';
-import FileStorage from '/js/utilities/fileStorage.js';
 import SearchHandler from '/js/utilities/searchHandler.js';
 import FlightsModel from '/js/models/FlightsModel.js';
+import BaseView from '/js/views/BaseView.js';
 
-class WaterPacksView {
+class WaterPacksView extends BaseView {
   constructor() {
+    super();
+
+    // Models
     this.categoryKey = null;
     this.category = null;
     this.queryParams = null;
     this.flightsModel = FlightsModel;
 
+    // Data
     const search = window.location.search;
     if (search) {
       const searchParams = new URLSearchParams(search);
@@ -21,6 +25,7 @@ class WaterPacksView {
       this.category = CategoryModel.getByField('name', this.categoryKey);
     }
 
+    // Render
     Promise.all([
       this.render(),
     ]).then(() => {
@@ -69,11 +74,6 @@ class WaterPacksView {
     document.getElementById('max').value = this.queryParams.max || '';
     document.getElementById('continent').value = this.queryParams.continent || 'all';
     document.getElementById('difficulty').value = this.queryParams.difficulty || 'all';
-  }
-
-  async getImagePath(image) {
-    const imageFile = await FileStorage.getFile(image);
-    return imageFile ? URL.createObjectURL(imageFile) : null;
   }
 
   async renderPackCards() {

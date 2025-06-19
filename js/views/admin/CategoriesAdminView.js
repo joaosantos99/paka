@@ -1,12 +1,15 @@
 import BaseAdminView from '/js/views/admin/BaseAdminView.js';
 import CategoryModel from '/js/models/CategoryModel.js';
 import ModalView from '/js/views/components/ModalView.js';
-import FileStorage from '/js/utilities/fileStorage.js';
 
 class CategoriesAdminView extends BaseAdminView {
-  constructor({ model }) {
+  constructor() {
     super();
-    this.model = model;
+
+    // Models
+    this.model = CategoryModel;
+
+    // Render
     Promise.all([
       this.renderView(),
     ]).then(() => {
@@ -100,11 +103,6 @@ class CategoriesAdminView extends BaseAdminView {
       title: 'View Icon',
       message: `<img class="max-w-50 w-full h-full m-auto object-contain" src="${icon}" alt="Category Icon" />`,
     }).show();
-  }
-
-  async getImagePath(image) {
-    const imageFile = await FileStorage.getFile(image);
-    return imageFile ? URL.createObjectURL(imageFile) : null;
   }
 
   handleAddEntry() {

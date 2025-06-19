@@ -3,14 +3,18 @@ import UserModel from '/js/models/UserModel.js';
 import ReservationModel from '/js/models/ReservationModel.js';
 import PackModel from '/js/models/PackModel.js';
 import FlightsModel from '/js/models/FlightsModel.js';
-import FileStorage from '/js/utilities/fileStorage.js';
 import CategoryModel from '/js/models/CategoryModel.js';
+import BaseView from '/js/views/BaseView.js';
 
-class ProfileReservationView {
+class ProfileReservationView extends BaseView {
   constructor() {
+    super();
+
+    // Models
     const userId = LocalStorageCRUD.read('user');
     this.user = UserModel.getByPk(userId);
 
+    // Render
     Promise.all([
       this.render()
     ]).then(() => {
@@ -24,11 +28,6 @@ class ProfileReservationView {
 
     await this.renderReservations();
     this.renderBadges();
-  }
-
-  async getImagePath(image) {
-    const imageFile = await FileStorage.getFile(image);
-    return imageFile ? URL.createObjectURL(imageFile) : null;
   }
 
   renderBadges() {
