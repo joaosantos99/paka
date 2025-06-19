@@ -1,237 +1,154 @@
-import HeaderModel from '/js/views/HeaderView.js';
+import FileStorage from '/js/utilities/fileStorage.js';
 import FlightsModel from '/js/models/FlightsModel.js';
 import CategoryModel from '/js/models/CategoryModel.js';
+import PackModel from '/js/models/PackModel.js';
 
 export default class HomeView {
   constructor() {
     this.flightsModel = FlightsModel;
     this.categoryModel = CategoryModel;
+    this.packModel = PackModel;
 
-    this.render();
-    this.addEventListeners();
-    new HeaderModel();
+    this.categories = this.categoryModel.getAll();
+    this.activeCategory = this.categories[0].name;
+
+    Promise.all([
+      this.render(),
+    ]).then(() => {
+      this.addEventListeners();
+    });
   }
 
-  getTemplate = () => `
-    <!-- Header + Search Section Start -->
-    <div class="sm:min-h-[750px] !bg-no-repeat !bg-cover !bg-center" style="background: url(../img/home-hero-bg.png)">
-      <div id="lightHeaderContainer"></div>
+  async render() {
+    const featuredCategoriesSection = document.getElementById('featuredCategoriesSection');
+    if (featuredCategoriesSection) {
+      featuredCategoriesSection.innerHTML = await this.getFeaturedCategoriesSection();
+    }
 
-      <!-- Search Filter Section Start -->
-      <section class="max-w-7xl px-4 mx-auto sm:mt-[450px] mt-40 sm:translate-y-0 translate-y-40">
-        <h4 class="text-3xl font-semibold text-[var(--screen-bg)] mb-3">Search for your next adventure!</h4>
+    const featuredPacksSection = document.getElementById('featuredPacksSection');
+    if (featuredPacksSection) {
+      featuredPacksSection.innerHTML = await this.getFeaturedPacksSection();
+    }
+  }
 
-        <div class="bg-[var(--light-bg-color)] p-4 rounded-md">
-          <form class="grid sm:grid-cols-12 md:gap-6 gap-2">
-            <div class="sm:col-span-10">
-              <div class="grid sm:grid-cols-4 md:gap-6 gap-2">
-                <input type="text" name="departure" id="departure"
-                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                    placeholder="Departure"
-                />
-                <div class="border rounded-md h-12 bg-[var(--screen-bg)] flex items-center justify-between">
-                    <div class="w-1/2">
-                        <input type="date" name="departingDate" id="departingDate"
-                            class="h-full p-3.5 focus-within:outline-0 text-sm w-full bg-transparent border-0"
-                            placeholder="Start Date"
-                    />
-                    </div>
-                    <div class="h-8 w-[1px] bg-gray-500"></div>
-                    <div class="w-1/2">
-                        <input type="date" name="returningDate" id="returningDate"
-                            class="h-full p-3.5 focus-within:outline-0 text-sm w-full bg-transparent border-0"
-                            placeholder="End Date"
-                        />
-                    </div>
-                </div>
-                <input type="number" name="numberOfPeople" id="numberOfPeople"
-                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]"
-                    placeholder="1 Person"
-                />
-                <select name="category" id="category"
-                    class="border rounded-md h-12 p-3.5 focus-within:outline-0 text-sm w-full bg-[var(--screen-bg)]">
-                    <option value="all">All Categories</option>
-                    ${CategoryModel.getAll().map(category => `
-                        <option
-                          ${this.categoryKey === category.name ? 'selected' : ''}
-                          value="${category.name}"
-                        >
-                          ${category.name}
-                        </option>
-                    `).join('')}
-                </select>
-              </div>
-            </div>
+  hydrateView() {
+    Promise.all([
+      this.render(),
+    ]).then(() => {
+      this.addEventListeners();
+    });
+  }
 
-            <div class="sm:col-span-2">
-              <button type="submit" class="bg-[var(--secondary-color)] text-white rounded-md h-12 px-2.5 w-full cursor-pointer">Search</button>
-            </div>
-          </form>
-        </div>
-      </section>
-      <!-- Search Filter Section End -->
-    </div>
-    <!-- Header + Search Section End -->
+  async getFeaturedCategoriesSection() {
+    const categories = this.categoryModel.getAll();
 
-    <!-- Adventure Section Start -->
-    <div class="relative">
-      <section class="max-w-7xl px-4 mx-auto sm:pt-24 pt-52 pb-24">
-        <h3 class="md:text-5xl text-4xl font-semibold mb-4 uppercase md:leading-14 md:w-9/12 z-10 relative">
-          Fuel your wanderlust and embark on unforgettable <span class="text-[var(--secondary-color)]">adventures.</span>
-        </h3>
-        <img src="../img/mountain-img.png" alt="Mountain Img" class="absolute right-0 bottom-0" />
-      </section>
-    </div>
-    <!-- Adventure Section End -->
+    const featuredCategories = await Promise.all(categories.map(async category => {
+      category.featuredImage = await this.getImagePath(category.featuredImage);
+      category.icon = await this.getImagePath(category.icon);
+      return category;
+    }));
 
-    <!-- Featured Categories Section Start -->
-    ${this.getFeaturedCategoriesSection()}
-    <!-- Featured Categories Section End -->
-
-    <!-- Featured Packs Section Start -->
-    ${this.getFeaturedPacksSection()}
-    <!-- Featured Packs Section End -->
-  `;
-
-  getFeaturedCategoriesSection = () => `
-    <section class="bg-[var(--light-bg-color)] py-12">
+    return `
       <div class="max-w-7xl px-4 mx-auto">
         <h4 class="md:text-4xl text-3xl font-semibold md:mb-8 pb-5">Featured Categories</h4>
-        <div class="md:grid md:grid-cols-12 flex gap-6 w-full overflow-x-auto">
-          <div class="!bg-no-repeat !bg-cover !bg-center p-4 rounded-xl text-[var(--screen-bg)] md:col-span-6 min-h-[600px] min-w-80 flex items-end" style="background: url(../img/feature-card-img1.png)">
+        <div class="flex gap-6 w-full overflow-x-hidden">
+          ${featuredCategories.map(category => `
+          <div class="!bg-no-repeat !bg-cover !bg-center p-4 rounded-xl text-[var(--screen-bg)] w-[100%] hover:w-[200%] transition-all duration-300 min-h-[600px] flex items-end" style="background: url(${category.featuredImage})">
             <div>
-              <img src="../img/icon/ic-mountain.svg" alt="Mountain Img" />
-              <h5 class="mt-2 text-2xl font-semibold">Mountain</h5>
-              <p class="md:w-10/12">Reach new heights and conquer the wild. Explore rugged peaks, hidden trails, and breathtaking horizons.</p>
-              <button type="submit" class="bg-[var(--secondary-color)] text-white rounded-md h-12 px-10 mt-3 w-full cursor-pointer">Explore</button>
+              <img src="${category.icon}" alt="${category.name} Img" />
+              <h5 class="mt-2 text-2xl font-semibold">${category.name}</h5>
+              <p class="md:w-10/12">${category.description}</p>
+              <a href="/html/category.html?category=${category.name}" class="flex items-center justify-center gap-2 bg-[var(--secondary-color)] text-white rounded-md h-12 px-10 mt-3 w-full cursor-pointer hover:bg-transparent hover:text-[var(--light-bg-color)] hover:border hover:border-[var(--light-bg-color)] transition-all duration-300">Explore</a>
             </div>
           </div>
-
-          <div class="!bg-no-repeat !bg-cover !bg-center p-4 rounded-xl text-[var(--screen-bg)] md:col-span-2 min-h-[600px] flex items-end" style="background: url(../img/feature-card-img2.png)">
-            <div class="w-full">
-              <img src="../img/icon/ic-water.svg" alt="Water Img" />
-              <p class="mt-2 text-2xl font-semibold">Water</p>
-              <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer mt-3">Explore</button>
-            </div>
-          </div>
-
-          <div class="!bg-no-repeat !bg-cover !bg-center p-4 rounded-xl text-[var(--screen-bg)] md:col-span-2 min-h-[600px] flex items-end" style="background: url(../img/feature-card-img3.png)">
-            <div class="w-full">
-              <img src="../img/icon/ic-cactus.svg" alt="Cactus Img" width="44" />
-              <p class="mt-2 text-2xl font-semibold">Desert</p>
-              <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer mt-3">Explore</button>
-            </div>
-          </div>
-
-          <div class="!bg-no-repeat !bg-cover !bg-center p-4 rounded-xl text-[var(--screen-bg)] md:col-span-2 min-h-[600px] flex items-end" style="background: url(../img/feature-card-img4.png)">
-            <div class="w-full">
-              <img src="../img/icon/ic-tree.svg" alt="Cactus Img" width="44" />
-              <p class="mt-2 text-2xl font-semibold">Forest</p>
-              <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer mt-3">Explore</button>
-            </div>
-          </div>
+          `).join('')}
         </div>
       </div>
     </section>
-  `;
+  `};
 
-  getFeaturedPacksSection = () => `
-    <section class="py-12">
+  async getFeaturedPacksSection() {
+    // Get packs from the selected category
+    const packs = this.packModel.getByCategory(this.activeCategory);
+    const maxPacks = 6;
+    const displayPacks = await Promise.all(packs.slice(0, maxPacks).map(async (pack, idx) => {
+      pack.featuredImage = await this.getImagePath(pack.featuredImage);
+
+      const icons = await Promise.all(pack.categories.map(async category => {
+        const categoryData = this.categories.find(c => c.name === category);
+        return categoryData ? await this.getImagePath(categoryData.icon) : null;
+      }));
+
+      return {
+        id: pack.id,
+        name: pack.name,
+        featuredImage: pack.featuredImage,
+        icons,
+        price: pack.price,
+        startDate: pack.startDate,
+        endDate: pack.endDate,
+        gridSpan: idx === 1 || idx === 5 ? 'lg:col-span-2' : '',
+      };
+    }));
+
+    return `
       <div class="max-w-7xl px-4 mx-auto">
         <h4 class="md:text-4xl text-3xl font-semibold">Featured Packs</h4>
 
         <div class="mt-8 mb-5 flex justify-between gap-5 items-center">
           <ul class="flex gap-2 overflow-x-auto">
+            ${this.categories.map((category, idx) => `
             <li>
-              <button type="button" class="border border-[var(--secondary-color)] py-2 px-8 rounded-md rounded-e-none cursor-pointer bg-[var(--secondary-color)] text-white font-medium w-36">Mountain</button>
+              ${this.activeCategory === category.name ? `
+                <button type="button" class="category-button border border-[var(--secondary-color)] py-2 px-8 ${idx === 0 ? 'rounded-md rounded-e-none' : ''} ${idx === this.categories.length - 1 ? 'rounded-md rounded-s-none' : ''} cursor-pointer bg-[var(--secondary-color)] text-white font-medium w-36">
+                  ${category.name}
+                </button>
+              ` : `
+                <button type="button" class="category-button border border-[var(--primary-color)] py-2 px-8 ${idx === 0 ? 'rounded-md rounded-e-none' : ''} ${idx === this.categories.length - 1 ? 'rounded-md rounded-s-none' : ''} cursor-pointer font-medium w-36">
+                  ${category.name}
+                </button>
+              `}
             </li>
-            <li>
-              <button type="button" class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium w-36">Water</button>
-            </li>
-            <li>
-              <button type="button" class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium w-36">Desert</button>
-            </li>
-            <li>
-              <button type="button" class="border border-[var(--primary-color)] py-2 px-8 cursor-pointer font-medium rounded-e-md w-36">Forest</button>
-            </li>
+            `).join('')}
           </ul>
         </div>
 
         <div class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-6">
-          <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between" style="background: url(../img/packs/1.png)">
-            <div class="flex items-center justify-center gap-3">
-              <img src="../img/icon/ic-mountain.svg" alt="Mountain Icon" width="34" />
-            </div>
-            <div class="text-center my-28">
-              <h4 class="text-3xl font-semibold text-center">Nazaré <br />Canyon</h4>
-              <p>11 to 15 April / 1760€</p>
-            </div>
-            <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2">Know More</button>
-          </div>
-
-          <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] lg:col-span-2 flex flex-col justify-between" style="background: url(../img/packs/2.png)">
-            <div class="flex items-center justify-center gap-3">
-              <img src="../img/icon/ic-mountain.svg" alt="Mountain Icon" width="34" />
-            </div>
-            <div class="text-center my-28">
-              <h4 class="text-3xl font-semibold text-center">Reforest <br />Iceland</h4>
-              <p>11 to 15 April / 1760€</p>
-            </div>
-            <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2">Know More</button>
-          </div>
-
-          <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between" style="background: url(../img/packs/3.png)">
-            <div class="flex items-center justify-center gap-3">
-              <img src="../img/icon/ic-cactus.svg" alt="Cactus Icon" width="34" />
-              <img src="../img/icon/ic-mountain.svg" alt="Mountain Icon" width="34" />
-            </div>
-            <div class="text-center my-28">
-              <h4 class="text-3xl font-semibold text-center">Petra and The Desert of Wadi Rum</h4>
-              <p>11 to 15 April / 1760€</p>
-            </div>
-            <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2">Know More</button>
-          </div>
-
-          <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between" style="background: url(../img/packs/4.png)">
-            <div class="flex items-center justify-center gap-3">
-              <img src="../img/icon/ic-mountain.svg" alt="Mountain Icon" width="34" />
-            </div>
-            <div class="text-center my-28">
-              <h4 class="text-3xl font-semibold text-center w-10/12 mx-auto">Sanctuary of the Annapurnas</h4>
-              <p>11 to 15 April / 1760€</p>
-            </div>
-            <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2">Know More</button>
-          </div>
-
-          <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between" style="background: url(../img/packs/5.png)">
-            <div class="flex items-center justify-center gap-3">
-              <img src="../img/icon/ic-mountain.svg" alt="Mountain Icon" width="34" />
-            </div>
-            <div class="text-center my-28">
-              <h4 class="text-3xl font-semibold text-center w-10/12 mx-auto">Mont Blanc</h4>
-              <p>11 to 15 April / 1760€</p>
-            </div>
-            <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2">Know More</button>
-          </div>
-
-          <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] lg:col-span-2 flex flex-col justify-between" style="background: url(../img/packs/6.png)">
-            <div class="flex items-center justify-center gap-3">
-              <img src="../img/icon/ic-mountain.svg" alt="Mountain Icon" width="34" />
-              <img src="../img/icon/ic-cactus.svg" alt="Cactus Icon" width="34" />
-              <img src="../img/icon/ic-tree.svg" alt="Tree Icon" width="34" />
-            </div>
-            <div class="text-center my-28">
-              <h4 class="text-3xl font-semibold text-center">Mongolian Exploration</h4>
-              <p>11 to 15 April / 1760€</p>
-            </div>
-            <button type="submit" class="border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2">Know More</button>
-          </div>
+          ${displayPacks.map((pack, index) => `
+              <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] ${pack.gridSpan} flex flex-col justify-between" style="background: url(${pack.featuredImage || '../img/packs/' + (index + 1) + '.png'})">
+                <div class="flex items-center justify-center gap-3">
+                  ${pack.icons.map(icon => `
+                    <img src="${icon}" alt="Category Icon" width="34" />
+                  `).join('')}
+                </div>
+                <div class="text-center my-28">
+                  <h4 class="text-3xl font-semibold text-center">${pack.title || pack.name}</h4>
+                  <p>${this.formatDateRange(pack.startDate, pack.endDate)} / ${pack.price}€</p>
+                </div>
+                <a
+                  class="flex items-center justify-center border border-[var(--screen-bg)] text-[var(--light-bg-color)] rounded-md h-12 px-1.5 w-full cursor-pointer md:col-span-2 hover:bg-[var(--secondary-color)] hover:border-[var(--secondary-color)] hover:text-[var(--screen-bg)] transition-all duration-300"
+                  href="/html/pack.html?id=${pack.id}"
+                >
+                  Know More
+                </a>
+              </div>
+            `).join('')}
         </div>
 
-        <button type="submit" class="border border-[var(--primary-bg)] text-[var(--primary-bg-color)] rounded-md h-12 px-12 w-fit mx-auto block cursor-pointer mt-6">Find More</button>
+        <a
+          class="flex items-center justify-center border border-[var(--primary-bg)] text-[var(--primary-bg-color)] rounded-md h-12 px-12 w-fit mx-auto block cursor-pointer mt-6 hover:bg-[var(--secondary-color)] hover:text-[var(--screen-bg)] transition-all duration-300"
+          href="/html/category.html?category=${this.activeCategory}"
+        >
+          Find More
+        </a>
       </div>
-    </section>
-  `;
+    `;
+  }
+
+  async getImagePath(image) {
+    const imageFile = await FileStorage.getFile(image);
+    return imageFile ? URL.createObjectURL(imageFile) : null;
+  }
 
   handleDepartureInput(e) {
     const input = e.target.value.toLowerCase();
@@ -285,6 +202,11 @@ export default class HomeView {
     if (departureInput) {
       departureInput.addEventListener('input', (e) => this.handleDepartureInput(e));
     }
+
+    const categoryButtons = document.querySelectorAll('button.category-button');
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', this.handleCategoryClick);
+    });
   }
 
   handleSearch = (e) => {
@@ -308,12 +230,18 @@ export default class HomeView {
     window.location = `/html/category.html?${queryParams.toString()}`;
   }
 
-  render() {
-    const app = document.getElementById('app');
-    if (app) {
-      app.innerHTML = this.getTemplate();
-      this.addEventListeners();
-    }
+  formatDateRange(startDate, endDate) {
+    const options = { day: 'numeric' };
+    const startDay = new Intl.DateTimeFormat('en-GB', options).format(new Date(startDate));
+    const endDay = new Intl.DateTimeFormat('en-GB', options).format(new Date(endDate));
+    const endMonth = new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(new Date(endDate));
+
+    return `${startDay} to ${endDay} ${endMonth}`;
+  }
+
+  handleCategoryClick = (e) => {
+    this.activeCategory = e.target.textContent.trim();
+    this.hydrateView();
   }
 }
 
