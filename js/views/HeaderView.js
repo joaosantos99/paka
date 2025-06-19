@@ -1,11 +1,14 @@
 import CategoryModel from '/js/models/CategoryModel.js';
+import LocalStorageCRUD from '/js/utilities/crud.js';
+import UserModel from '/js/models/UserModel.js';
 
 export default class HeaderModel {
   constructor() {
     // Select the <body> element from the DOM
     this.body = document.querySelector('body');
     this.lightHeaderContainer = document.getElementById('lightHeaderContainer');
-
+    const userId = LocalStorageCRUD.read('user');
+    this.user = UserModel.getByPk(userId);
     if (document.querySelector('header')) {
       document.querySelector('header').remove();
     }
@@ -40,18 +43,27 @@ export default class HeaderModel {
         </ul>
 
         <!-- User icon for desktop, toggle icon for mobile -->
-        <a href="/html/login.html">
-          <img
-            ${this.lightHeaderContainer ? 'src="/img/icon/ic-user-light.svg"' : 'src="/img/icon/ic-user.svg"'}
-            alt="User Icon"
-            class="sm:block hidden"
-          />
-          <img
-            ${this.lightHeaderContainer ? 'src="/img/icon/ic-toggle-light.svg"' : 'src="/img/icon/ic-toggle.svg"'}
-            alt="Toggle Icon"
-            class="sm:hidden block"
-          />
+        <div class="flex items-center gap-6">
+          ${this.user.isAdmin ? `
+            <a class="text-sm bg-[var(--secondary-color)] text-white rounded-md px-4 py-2" href="/html/admin/packs.html">
+              Admin Dashboard
+            </a>
+          ` : ''}
+          <a href="${this.user.id ? '/html/profile/settings.html' : '/html/login.html'}">
+            <img
+              ${this.lightHeaderContainer ? 'src="/img/icon/ic-user-light.svg"' : 'src="/img/icon/ic-user.svg"'}
+              alt="User Icon"
+              class="sm:block hidden"
+            />
           </a>
+          <button class="sm:hidden block">
+            <img
+              ${this.lightHeaderContainer ? 'src="/img/icon/ic-toggle-light.svg"' : 'src="/img/icon/ic-toggle.svg"'}
+              alt="Toggle Icon"
+              class="sm:hidden block"
+              />
+            </button>
+        </div>
       </nav>
     </header>
   `;
