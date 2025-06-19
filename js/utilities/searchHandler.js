@@ -55,7 +55,7 @@ class SearchHandler {
 
     let packs = [];
 
-    if (category) {
+    if (category && category !== 'All') {
       packs = this.packModel.getByCategory(category);
     } else {
       packs = this.packModel.getAll();
