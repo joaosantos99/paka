@@ -94,7 +94,7 @@ class WaterPacksView extends BaseView {
     document.getElementById('packCards').innerHTML = packs.map(pack => `
       <div
         class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between"
-        style="background: url(${pack.featuredImage})"
+        style="background-image: url(${pack.featuredImage}); background-color: #8d8d8d; background-blend-mode: multiply;"
         data-id="${pack.id}"
       >
         <div class="flex items-center justify-center gap-3">

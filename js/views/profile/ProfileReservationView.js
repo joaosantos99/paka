@@ -112,7 +112,7 @@ class ProfileReservationView extends BaseView {
     const reservationsContainer = document.getElementById('reservationsGrid');
     reservationsContainer.innerHTML = cards.map(card => `
             <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)]"
-                style="background: url(${card.image})">
+                style="background: url(${card.image}); background-color: #8d8d8d; background-blend-mode: multiply;">
                 <div class="flex items-center justify-center gap-3">
                     ${card.icons.map(icon => `
                         <img src="${icon}" alt="${icon} Icon" />

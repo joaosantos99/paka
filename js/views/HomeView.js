@@ -119,7 +119,10 @@ export default class HomeView extends BaseView {
 
         <div class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-6">
           ${displayPacks.map((pack, index) => `
-              <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] ${pack.gridSpan} flex flex-col justify-between" style="background: url(${pack.featuredImage || '../img/packs/' + (index + 1) + '.png'})">
+              <div
+                class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] ${pack.gridSpan} flex flex-col justify-between"
+                style="background: url(${pack.featuredImage}); background-color: #8d8d8d; background-blend-mode: multiply;"
+              >
                 <div class="flex items-center justify-center gap-3">
                   ${pack.icons.map(icon => `
                     <img src="${icon}" alt="Category Icon" width="34" />

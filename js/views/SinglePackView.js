@@ -18,6 +18,7 @@ class SinglePackView extends BaseView {
     // Data
     this.userId = LocalStorageCRUD.read('user');
     this.isAlreadyReserved = false;
+    this.packCategories = [];
 
     const search = window.location.search;
     if (search) {
@@ -34,6 +35,8 @@ class SinglePackView extends BaseView {
 
     this.pack = PackModel.getByPk(parseInt(this.packId));
 
+    this.packCategories = this.pack.categories.map(category => CategoryModel.getByField('name', category));
+
     // Render
     Promise.all([
       this.render()
@@ -45,6 +48,9 @@ class SinglePackView extends BaseView {
   async render() {
     document.getElementById('packName').textContent = this.pack.name;
     document.getElementById('packHero').style.backgroundImage = `url(${await this.getImagePath(this.pack.featuredImage)})`;
+    document.getElementById('packCategoriesIcons').innerHTML = await Promise.all(this.packCategories.map(async category => `
+      <img src="${await this.getImagePath(category.icon)}" alt="${category.name} Icon" width="82" />
+    `));
     document.getElementById('packPriceAndDate').textContent = `${this.formatDateRange(this.pack.startDate, this.pack.endDate)} | ${this.pack.price}€`;
     document.getElementById('addReservationButton').disabled = this.isAlreadyReserved;
     document.getElementById('packTitle').textContent = this.pack.title;
@@ -84,12 +90,10 @@ class SinglePackView extends BaseView {
       }
     }));
 
-    console.log(similarPacksData);
-
     const packsContainer = document.getElementById('similarPacks');
-    packsContainer.innerHTML = similarPacksData.map(pack => `
+    packsContainer.innerHTML = similarPacksData.slice(0, 4).map(pack => `
             <div class="!bg-no-repeat !bg-cover !bg-center p-3 rounded-md text-[var(--screen-bg)] flex flex-col justify-between md:min-w-md"
-                style="background: url(${pack.image})">
+                style="background: url(${pack.image}); background-color: #8d8d8d; background-blend-mode: multiply;">
                 <div class="flex items-center justify-center gap-3">
                     ${pack.icons.map(icon => `
                         <img src="${icon}" alt="${icon} Icon" width="34" />
