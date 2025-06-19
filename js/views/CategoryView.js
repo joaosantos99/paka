@@ -29,10 +29,18 @@ class WaterPacksView {
   }
 
   async render() {
-    document.getElementById('categoryName').textContent = this.category.name;
-    document.getElementById('categoryHero').style.backgroundImage = `url(${await this.getImagePath(this.category.featuredImage)})`;
-    document.getElementById('categoryIcon').src = await this.getImagePath(this.category.icon);
-    document.getElementById('categoryIconBottom').src = await this.getImagePath(this.category.icon);
+    if (this.category) {
+      document.getElementById('categoryName').textContent = this.category.name;
+      document.getElementById('categoryHero').style.backgroundImage = `url(${await this.getImagePath(this.category.featuredImage)})`;
+      document.getElementById('categoryIcon').src = await this.getImagePath(this.category.icon);
+      document.getElementById('categoryIconBottom').src = await this.getImagePath(this.category.icon);
+    } else {
+      document.getElementById('categoryName').textContent = 'All';
+      document.getElementById('categoryName').style.opacity = 0;
+      document.getElementById('categoryHero').style.backgroundColor = 'var(--primary-color)';
+      document.getElementById('categoryIcon').style.opacity = 0;
+      document.getElementById('categoryIconBottom').remove();
+    }
 
     this.renderForm();
     await this.renderPackCards();
@@ -70,6 +78,7 @@ class WaterPacksView {
 
   async renderPackCards() {
     const packs = SearchHandler.search();
+    console.log(packs);
 
     await Promise.all(packs.map(async pack => {
       if (typeof pack.featuredImage === 'string' && pack.featuredImage.length > 0) {

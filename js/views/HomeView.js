@@ -20,6 +20,13 @@ export default class HomeView {
   }
 
   async render() {
+    const categorySelect = document.getElementById('category');
+    if (categorySelect) {
+      categorySelect.innerHTML = [{ name: 'All' }, ...this.categories].map(category => `
+        <option value="${category.name}">${category.name}</option>
+      `).join('');
+    }
+
     const featuredCategoriesSection = document.getElementById('featuredCategoriesSection');
     if (featuredCategoriesSection) {
       featuredCategoriesSection.innerHTML = await this.getFeaturedCategoriesSection();
