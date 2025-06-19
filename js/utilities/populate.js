@@ -1,14 +1,102 @@
 import LocalStorageCRUD from '/js/utilities/crud.js';
+import FileStorage from '/js/utilities/fileStorage.js';
 
-export const populate = () => {
-  console.log('populate');
+export const populateFileStorage = async () => {
+  const images = [
+    // Main images
+    { path: '/img/404-bg.png', name: '404-bg.png' },
+    { path: '/img/black-logo.svg', name: 'black-logo.svg' },
+    { path: '/img/cactus-img.png', name: 'cactus-img.png' },
+    { path: '/img/cactus-img1.png', name: 'cactus-img1.png' },
+    { path: '/img/contact-hero-bg.png', name: 'contact-hero-bg.png' },
+    { path: '/img/desert-hero-bg.png', name: 'desert-hero-bg.png' },
+    { path: '/img/favicon.svg', name: 'favicon.svg' },
+    { path: '/img/feature-card-img1.png', name: 'feature-card-img1.png' },
+    { path: '/img/feature-card-img2.png', name: 'feature-card-img2.png' },
+    { path: '/img/feature-card-img3.png', name: 'feature-card-img3.png' },
+    { path: '/img/feature-card-img4.png', name: 'feature-card-img4.png' },
+    { path: '/img/forest-hero-bg.png', name: 'forest-hero-bg.png' },
+    { path: '/img/home-hero-bg.png', name: 'home-hero-bg.png' },
+    { path: '/img/light-logo.svg', name: 'light-logo.svg' },
+    { path: '/img/login-hero-bg.png', name: 'login-hero-bg.png' },
+    { path: '/img/map.png', name: 'map.png' },
+    { path: '/img/mountain-hero-bg.png', name: 'mountain-hero-bg.png' },
+    { path: '/img/mountain-img.png', name: 'mountain-img.png' },
+    { path: '/img/mountain-img-light.png', name: 'mountain-img-light.png' },
+    { path: '/img/pack-hero-bg.png', name: 'pack-hero-bg.png' },
+    { path: '/img/profile-card-img.png', name: 'profile-card-img.png' },
+    { path: '/img/tree-img.png', name: 'tree-img.png' },
+    { path: '/img/tree-img1.png', name: 'tree-img1.png' },
+    { path: '/img/upload-img.png', name: 'upload-img.png' },
+    { path: '/img/user-profile.svg', name: 'user-profile.svg' },
+    { path: '/img/water-hero-bg.png', name: 'water-hero-bg.png' },
+    { path: '/img/water-img.png', name: 'water-img.png' },
+
+    // Pack images
+    { path: '/img/packs/1.png', name: 'pack-1.png' },
+    { path: '/img/packs/2.png', name: 'pack-2.png' },
+    { path: '/img/packs/3.png', name: 'pack-3.png' },
+    { path: '/img/packs/4.png', name: 'pack-4.png' },
+    { path: '/img/packs/5.png', name: 'pack-5.png' },
+    { path: '/img/packs/6.png', name: 'pack-6.png' },
+    { path: '/img/packs/7.png', name: 'pack-7.png' },
+    { path: '/img/packs/8.png', name: 'pack-8.png' },
+    { path: '/img/packs/9.png', name: 'pack-9.png' },
+
+    // Icons
+    { path: '/img/icon/ic-cactus.svg', name: 'ic-cactus.svg' },
+    { path: '/img/icon/ic-close.svg', name: 'ic-close.svg' },
+    { path: '/img/icon/ic-delete.svg', name: 'ic-delete.svg' },
+    { path: '/img/icon/ic-edit.svg', name: 'ic-edit.svg' },
+    { path: '/img/icon/ic-empty-globe.svg', name: 'ic-empty-globe.svg' },
+    { path: '/img/icon/ic-eye-closed.svg', name: 'ic-eye-closed.svg' },
+    { path: '/img/icon/ic-fb.svg', name: 'ic-fb.svg' },
+    { path: '/img/icon/ic-filled-globe.svg', name: 'ic-filled-globe.svg' },
+    { path: '/img/icon/ic-insta.svg', name: 'ic-insta.svg' },
+    { path: '/img/icon/ic-mountain.svg', name: 'ic-mountain.svg' },
+    { path: '/img/icon/ic-toggle-light.svg', name: 'ic-toggle-light.svg' },
+    { path: '/img/icon/ic-toggle.svg', name: 'ic-toggle.svg' },
+    { path: '/img/icon/ic-tree.svg', name: 'ic-tree.svg' },
+    { path: '/img/icon/ic-twitter.svg', name: 'ic-twitter.svg' },
+    { path: '/img/icon/ic-user-light.svg', name: 'ic-user-light.svg' },
+    { path: '/img/icon/ic-user.svg', name: 'ic-user.svg' },
+    { path: '/img/icon/ic-water.svg', name: 'ic-water.svg' }
+  ];
+
+  const fileMapping = {};
+
+  for (const image of images) {
+    try {
+      const response = await fetch(image.path);
+      if (response.ok) {
+        const blob = await response.blob();
+        const file = new File([blob], image.name, { type: blob.type });
+        const fileKey = await FileStorage.saveFile(file);
+        fileMapping[image.name] = fileKey;
+        console.log(`Uploaded: ${image.name} with key: ${fileKey}`);
+      } else {
+        console.warn(`Failed to fetch ${image.path}: ${response.status}`);
+      }
+    } catch (error) {
+      console.error(`Error uploading ${image.name}:`, error);
+    }
+  }
+
+  console.log(`Successfully uploaded ${Object.keys(fileMapping).length} images to file storage`);
+  return fileMapping;
+};
+
+export const populate = async () => {
+  // First populate file storage with images
+  const fileMapping = await populateFileStorage();
+
   const defaultCategories = [
     {
       id: 1,
       name: "Mountains",
       description: "Reach new heights and conquer the wild. Explore rugged peaks, hidden trails, and breathtaking horizons.",
-      featuredImage: "file_1749913782582_mountain-hero-bg.png",
-      icon: "file_1749913782586_ic-mountain.svg",
+      featuredImage: fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+      icon: fileMapping['ic-mountain.svg'] || "file_1749914661215_ic-mountain.svg",
       numberOfPacks: 0,
       deleted: false
     },
@@ -16,8 +104,8 @@ export const populate = () => {
       id: 2,
       name: "Water",
       description: "Reach new heights and conquer the wild. Explore rugged peaks, hidden trails, and breathtaking horizons.",
-      featuredImage: "file_1749914661212_water-hero-bg.png",
-      icon: "file_1749914661215_ic-water.svg",
+      featuredImage: fileMapping['water-hero-bg.png'] || "file_1749914661212_water-hero-bg.png",
+      icon: fileMapping['ic-water.svg'] || "file_1749914661215_ic-water.svg",
       numberOfPacks: 0,
       deleted: false
     },
@@ -25,8 +113,8 @@ export const populate = () => {
       id: 3,
       name: "Desert",
       description: "Reach new heights and conquer the wild. Explore rugged peaks, hidden trails, and breathtaking horizons.",
-      featuredImage: "file_1749914775083_desert-hero-bg.png",
-      icon: "file_1749914775085_ic-cactus.svg",
+      featuredImage: fileMapping['desert-hero-bg.png'] || "file_1749914775083_desert-hero-bg.png",
+      icon: fileMapping['ic-cactus.svg'] || "file_1749914775085_ic-cactus.svg",
       numberOfPacks: 0,
       deleted: false
     },
@@ -34,8 +122,8 @@ export const populate = () => {
       id: 4,
       name: "Forest",
       description: "Reach new heights and conquer the wild. Explore rugged peaks, hidden trails, and breathtaking horizons.",
-      featuredImage: "file_1749914719945_forest-hero-bg.png",
-      icon: "file_1749914719948_ic-tree.svg",
+      featuredImage: fileMapping['forest-hero-bg.png'] || "file_1749914719945_forest-hero-bg.png",
+      icon: fileMapping['ic-tree.svg'] || "file_1749914719948_ic-tree.svg",
       numberOfPacks: 0,
       deleted: false
     }
@@ -368,8 +456,11 @@ export const populate = () => {
       description: "Experience the majestic Swiss Alps with guided hiking, mountain biking, and authentic Swiss cuisine.",
       startDate: "2025-07-01",
       endDate: "2025-07-07",
-      featuredImage: "file_1749913782582_mountain-hero-bg.png",
-      images: ["file_1749913782582_mountain-hero-bg.png"],
+      featuredImage: fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+      images: [
+        fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+        fileMapping['pack-1.png'] || "file_1749913782582_pack-1.png"
+      ],
       stops: ["Zermatt", "Interlaken", "Lucerne"],
       difficulty: "Medium",
       continent: "Europe",
@@ -385,8 +476,11 @@ export const populate = () => {
       description: "Sail through the crystal-clear waters of the Aegean Sea, visiting ancient ruins and beautiful beaches.",
       startDate: "2025-08-15",
       endDate: "2025-08-22",
-      featuredImage: "file_1749914661212_water-hero-bg.png",
-      images: ["file_1749914661212_water-hero-bg.png"],
+      featuredImage: fileMapping['water-hero-bg.png'] || "file_1749914661212_water-hero-bg.png",
+      images: [
+        fileMapping['water-hero-bg.png'] || "file_1749914661212_water-hero-bg.png",
+        fileMapping['pack-2.png'] || "file_1749914661212_pack-2.png"
+      ],
       stops: ["Santorini", "Mykonos", "Crete"],
       difficulty: "Easy",
       continent: "Europe",
@@ -402,8 +496,11 @@ export const populate = () => {
       description: "Journey through the Sahara Desert, experience Berber culture, and camp under the stars.",
       startDate: "2025-09-10",
       endDate: "2025-09-17",
-      featuredImage: "file_1749914775083_desert-hero-bg.png",
-      images: ["file_1749914775083_desert-hero-bg.png"],
+      featuredImage: fileMapping['desert-hero-bg.png'] || "file_1749914775083_desert-hero-bg.png",
+      images: [
+        fileMapping['desert-hero-bg.png'] || "file_1749914775083_desert-hero-bg.png",
+        fileMapping['pack-3.png'] || "file_1749914775083_pack-3.png"
+      ],
       stops: ["Marrakech", "Merzouga", "Fez"],
       difficulty: "Hard",
       continent: "Africa",
@@ -419,8 +516,11 @@ export const populate = () => {
       description: "Discover the wonders of the Amazon rainforest with expert guides and unique wildlife encounters.",
       startDate: "2025-10-05",
       endDate: "2025-10-15",
-      featuredImage: "file_1749914719945_forest-hero-bg.png",
-      images: ["file_1749914719945_forest-hero-bg.png"],
+      featuredImage: fileMapping['forest-hero-bg.png'] || "file_1749914719945_forest-hero-bg.png",
+      images: [
+        fileMapping['forest-hero-bg.png'] || "file_1749914719945_forest-hero-bg.png",
+        fileMapping['pack-4.png'] || "file_1749914719945_pack-4.png"
+      ],
       stops: ["Manaus", "Amazon Lodge", "Rio Negro"],
       difficulty: "Hard",
       continent: "South America",
@@ -436,8 +536,11 @@ export const populate = () => {
       description: "Trek through the Himalayas, visit ancient monasteries, and experience local culture.",
       startDate: "2025-11-01",
       endDate: "2025-11-14",
-      featuredImage: "file_1749913782582_mountain-hero-bg.png",
-      images: ["file_1749913782582_mountain-hero-bg.png"],
+      featuredImage: fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+      images: [
+        fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+        fileMapping['pack-5.png'] || "file_1749913782582_pack-5.png"
+      ],
       stops: ["Kathmandu", "Namche Bazaar", "Everest Base Camp"],
       difficulty: "Hard",
       continent: "Asia",
@@ -453,8 +556,11 @@ export const populate = () => {
       description: "Explore multiple Caribbean islands, enjoy pristine beaches, and vibrant local culture.",
       startDate: "2025-12-20",
       endDate: "2025-12-30",
-      featuredImage: "file_1749914661212_water-hero-bg.png",
-      images: ["file_1749914661212_water-hero-bg.png"],
+      featuredImage: fileMapping['water-hero-bg.png'] || "file_1749914661212_water-hero-bg.png",
+      images: [
+        fileMapping['water-hero-bg.png'] || "file_1749914661212_water-hero-bg.png",
+        fileMapping['pack-6.png'] || "file_1749914661212_pack-6.png"
+      ],
       stops: ["Jamaica", "Bahamas", "Cuba"],
       difficulty: "Easy",
       continent: "North America",
@@ -470,8 +576,11 @@ export const populate = () => {
       description: "Explore the driest non-polar desert in the world, stargaze, and visit unique landscapes.",
       startDate: "2026-01-15",
       endDate: "2026-01-22",
-      featuredImage: "file_1749914775083_desert-hero-bg.png",
-      images: ["file_1749914775083_desert-hero-bg.png"],
+      featuredImage: fileMapping['desert-hero-bg.png'] || "file_1749914775083_desert-hero-bg.png",
+      images: [
+        fileMapping['desert-hero-bg.png'] || "file_1749914775083_desert-hero-bg.png",
+        fileMapping['pack-7.png'] || "file_1749914775083_pack-7.png"
+      ],
       stops: ["San Pedro de Atacama", "Valle de la Luna", "Salar de Atacama"],
       difficulty: "Medium",
       continent: "South America",
@@ -487,8 +596,11 @@ export const populate = () => {
       description: "Experience the rich biodiversity of Costa Rica's rainforests and cloud forests.",
       startDate: "2026-02-01",
       endDate: "2026-02-10",
-      featuredImage: "file_1749914719945_forest-hero-bg.png",
-      images: ["file_1749914719945_forest-hero-bg.png"],
+      featuredImage: fileMapping['forest-hero-bg.png'] || "file_1749914719945_forest-hero-bg.png",
+      images: [
+        fileMapping['forest-hero-bg.png'] || "file_1749914719945_forest-hero-bg.png",
+        fileMapping['pack-8.png'] || "file_1749914719945_pack-8.png"
+      ],
       stops: ["Monteverde", "Arenal", "Manuel Antonio"],
       difficulty: "Medium",
       budgetRange: "Standard",
@@ -504,8 +616,11 @@ export const populate = () => {
       description: "Discover the stunning landscapes of the Canadian Rockies with guided hikes and wildlife viewing.",
       startDate: "2026-03-15",
       endDate: "2026-03-22",
-      featuredImage: "file_1749913782582_mountain-hero-bg.png",
-      images: ["file_1749913782582_mountain-hero-bg.png"],
+      featuredImage: fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+      images: [
+        fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+        fileMapping['pack-9.png'] || "file_1749913782582_pack-9.png"
+      ],
       stops: ["Banff", "Jasper", "Lake Louise"],
       difficulty: "Medium",
       budgetRange: "Standard",
@@ -521,8 +636,11 @@ export const populate = () => {
       description: "Explore the world's largest coral reef system with diving, snorkeling, and island hopping.",
       startDate: "2026-04-01",
       endDate: "2026-04-10",
-      featuredImage: "file_1749914661212_water-hero-bg.png",
-      images: ["file_1749914661212_water-hero-bg.png"],
+      featuredImage: fileMapping['water-hero-bg.png'] || "file_1749914661212_water-hero-bg.png",
+      images: [
+        fileMapping['water-hero-bg.png'] || "file_1749914661212_water-hero-bg.png",
+        fileMapping['pack-1.png'] || "file_1749914661212_pack-1.png"
+      ],
       stops: ["Cairns", "Whitsunday Islands", "Hamilton Island"],
       difficulty: "Easy",
       continent: "Oceania",
@@ -538,8 +656,11 @@ export const populate = () => {
       description: "Hike through the stunning landscapes of Patagonia, including Torres del Paine National Park.",
       startDate: "2026-05-01",
       endDate: "2026-05-15",
-      featuredImage: "file_1749913782582_mountain-hero-bg.png",
-      images: ["file_1749913782582_mountain-hero-bg.png"],
+      featuredImage: fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+      images: [
+        fileMapping['mountain-hero-bg.png'] || "file_1749913782582_mountain-hero-bg.png",
+        fileMapping['pack-2.png'] || "file_1749913782582_pack-2.png"
+      ],
       stops: ["Puerto Natales", "Torres del Paine", "El Calafate"],
       difficulty: "Hard",
       continent: "South America",
@@ -555,8 +676,11 @@ export const populate = () => {
       description: "Combine desert exploration with mountain trekking in the Atlas Mountains.",
       startDate: "2026-06-01",
       endDate: "2026-06-12",
-      featuredImage: "file_1749914775083_desert-hero-bg.png",
-      images: ["file_1749914775083_desert-hero-bg.png"],
+      featuredImage: fileMapping['desert-hero-bg.png'] || "file_1749914775083_desert-hero-bg.png",
+      images: [
+        fileMapping['desert-hero-bg.png'] || "file_1749914775083_desert-hero-bg.png",
+        fileMapping['pack-3.png'] || "file_1749914775083_pack-3.png"
+      ],
       stops: ["Marrakech", "Atlas Mountains", "Sahara Desert"],
       difficulty: "Hard",
       continent: "Africa",
@@ -568,4 +692,48 @@ export const populate = () => {
   LocalStorageCRUD.update('packs', defaultPacks);
   LocalStorageCRUD.update('packs-index', 12);
 
+  const defaultUsers = [
+    {
+      id: 1,
+      name: "Admin",
+      email: "admin@example.com",
+      password: "password123",
+      isAdmin: true,
+      deleted: false
+    },
+    {
+      id: 2,
+      name: "John Doe",
+      email: "john.doe@example.com",
+      password: "password123",
+      isAdmin: false,
+      deleted: false
+    },
+  ];
+
+  LocalStorageCRUD.update('users', defaultUsers);
+  LocalStorageCRUD.update('users-index', 2);
 }
+
+// Helper function to get file mapping for use in other parts of the application
+export const getFileMapping = async () => {
+  const files = await FileStorage.listFiles();
+  const mapping = {};
+
+  for (const file of files) {
+    // Extract the original filename from the key
+    const originalName = file.key.split('_').slice(2).join('_');
+    mapping[originalName] = file.key;
+  }
+
+  return mapping;
+};
+
+// Convenience function to populate everything
+export const populateAll = async () => {
+  console.log('Starting population of file storage and default data...');
+  await populate();
+  console.log('Population completed successfully!');
+
+  window.location.reload();
+};

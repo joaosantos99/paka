@@ -1,5 +1,5 @@
 import LocalStorageCRUD from '/js/utilities/crud.js';
-import { populate } from '/js/utilities/populate.js'
+import { populateAll } from '/js/utilities/populate.js'
 
 const checkStorage = (key) => {
   const exists = LocalStorageCRUD.hasKey(key);
@@ -33,5 +33,5 @@ checkStorage('reservations');
 
 // Only populate if all storage items are empty
 if (areAllStorageEmpty()) {
-  populate();
+  populateAll();
 }

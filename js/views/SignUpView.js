@@ -30,7 +30,7 @@ export default class SignUpView {
       img.src = '/img/icon/ic-eye-closed.svg';
       img.alt = 'Show Password';
     } else {
-      img.src = '/img/icon/ic-eye-open.svg';
+      img.src = '/img/icon/ic-eye-closed.svg';
       img.alt = 'Hide Password';
     }
   }
@@ -62,7 +62,7 @@ export default class SignUpView {
   }
 
   validateForm(data) {
-    if (!data.fullName || !data.email || !data.password || !data.confirmPassword) {
+    if (!data.name || !data.email || !data.password || !data.confirmPassword) {
       alert('Please fill in all fields');
       return false;
     }

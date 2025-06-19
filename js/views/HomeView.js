@@ -185,6 +185,19 @@ export default class HomeView extends BaseView {
         existingList.remove();
       }
 
+      // Add click event listener to document to handle clicks outside
+      const handleClickOutside = (event) => {
+        const list = document.getElementById('departure-autocomplete');
+        const departureInput = document.getElementById('departure');
+
+        if (list && !list.contains(event.target) && event.target !== departureInput) {
+          list.remove();
+          document.removeEventListener('click', handleClickOutside);
+        }
+      };
+
+      document.addEventListener('click', handleClickOutside);
+
       // Insert the list after the input
       inputContainer.appendChild(list);
     }

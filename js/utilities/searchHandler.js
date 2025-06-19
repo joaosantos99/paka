@@ -36,22 +36,24 @@ class SearchHandler {
     } = this.getQueryParams() || {};
 
     const userId = LocalStorageCRUD.read('user');
-    const userName = UserModel.getByPk(userId).name;
+    if (userId) {
+      const userName = UserModel.getByPk(userId).name;
 
-    this.searchModel.create({
-      category,
-      departingDate,
-      returningDate,
-      stops,
-      difficulty,
-      min,
-      max,
-      continent,
-      numberOfPeople,
-      departure,
-      userId,
-      userName,
-    });
+      this.searchModel.create({
+        category,
+        departingDate,
+        returningDate,
+        stops,
+        difficulty,
+        min,
+        max,
+        continent,
+        numberOfPeople,
+        departure,
+        userId,
+        userName,
+      });
+    }
 
     let packs = [];
 
